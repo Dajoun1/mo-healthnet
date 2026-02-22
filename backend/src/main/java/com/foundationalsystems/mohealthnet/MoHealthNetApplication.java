@@ -4,10 +4,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MohealthnetApplication {
+/**
+ * Main method that serves as the entry point for the Spring Boot application.
+ */
+public class MoHealthNetApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MohealthnetApplication.class, args);
+		SpringApplication.run(MoHealthNetApplication.class, args);
 	}
 
 }
