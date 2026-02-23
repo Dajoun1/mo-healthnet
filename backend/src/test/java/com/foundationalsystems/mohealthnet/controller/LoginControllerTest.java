@@ -1,23 +1,37 @@
 package com.foundationalsystems.mohealthnet.controller;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.Map;
 
-@WebMvcTest(LoginController.class)
+import static org.assertj.core.api.Assertions.assertThat;
+
 class LoginControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
 
     @Test
-    void loginEndpointReturnsExpectedString() throws Exception {
-        mockMvc.perform(get("/login"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Testing login endpoint"));
+    void loginEndpointReturnsExpectedResponse() {
+        LoginController controller = new LoginController();
+        Map<String, String> credentials = Map.of(
+                "email", "test@example.com",
+                "password", "password123"
+        );
+
+        Map<String, String> response = controller.handleLogin(credentials);
+
+        assertThat(response).isNotNull();
+        assertThat(response.get("message")).isEqualTo("Login request received successfully");
+        assertThat(response.get("email")).isEqualTo("test@example.com");
+        assertThat(response.get("status")).isEqualTo("testing");
+    }
+
+    @Test
+    void loginEndpointWithNullEmailReturnsNull() {
+        LoginController controller = new LoginController();
+        Map<String, String> credentials = Map.of("password", "password123");
+
+        Map<String, String> response = controller.handleLogin(credentials);
+
+        assertThat(response).isNotNull();
+        assertThat(response.get("email")).isNull();
     }
 }
