@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import SignIn from './components/Signin'
+import TestConnection from './pages/TestConnection';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path='/signin' element={<SignIn/>} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/test" element={<TestConnection />} />
           </Routes>
         </main>
       </div>
