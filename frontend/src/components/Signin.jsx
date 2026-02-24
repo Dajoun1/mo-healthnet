@@ -12,10 +12,10 @@ const Signin = () => {
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    const { type, value } = e.target;
+    const { name, value } = e.target; // Fixed: use name instead of type
     setFormData({
       ...formData,
-      [type === "password" ? "password" : "email"]: value,
+      [name]: value,
     });
     if (error) setError("");
   };
@@ -28,7 +28,7 @@ const Signin = () => {
     try {
       const response = await authService.login(formData);
       console.log("Login successful:", response);
-      navigate("/dashboard"); // Using React Router navigation
+      navigate("/");
     } catch (err) {
       setError(err.message || "Invalid email or password");
     } finally {
@@ -42,15 +42,20 @@ const Signin = () => {
         <h1 className="font-sans opacity-60">Applicant Login</h1>
 
         {error && (
-          <div className="w-full p-3 text-sm text-red-600 bg-red-100 rounded-md">
+          <div
+            data-testid="error-message"
+            className="w-full p-3 text-sm text-red-600 bg-red-100 rounded-md"
+          >
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col w-full gap-2">
           <input
-            className="w-full px-5 py-2 mt-2 text-sm border rounded-md border-slate-300 focus:outline-custom-[#1196d4]"
+            data-testid="email-input"
+            className="w-full px-5 py-2 mt-2 text-sm border rounded-md border-slate-300 focus:outline-[#1196d4]"
             type="email"
+            name="email"
             placeholder="name@example.com"
             value={formData.email}
             onChange={handleChange}
@@ -58,8 +63,10 @@ const Signin = () => {
             disabled={loading}
           />
           <input
-            className="w-full px-5 py-2 mt-2 text-sm border rounded-md border-slate-300 focus:outline-custom-[#1196d4]"
+            data-testid="password-input"
+            className="w-full px-5 py-2 mt-2 text-sm border rounded-md border-slate-300 focus:outline-[#1196d4]"
             type="password"
+            name="password"
             placeholder="Enter your password"
             value={formData.password}
             onChange={handleChange}
@@ -74,6 +81,7 @@ const Signin = () => {
           </span>
 
           <button
+            data-testid="submit-button"
             type="submit"
             className="w-full px-4 py-2 text-white rounded-md bg-[#0078AE] hover:bg-[#1a89bd] disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading}

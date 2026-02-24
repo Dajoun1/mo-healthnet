@@ -28,6 +28,7 @@ api.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
             window.location.href = '/signin';
         }
         return Promise.reject(error);
@@ -54,8 +55,12 @@ export const authService = {
     },
 
     getCurrentUser: () => {
-        const user = localStorage.getItem('user');
-        return user ? JSON.parse(user) : null;
+        try {
+            const user = localStorage.getItem('user');
+            return user ? JSON.parse(user) : null;
+        } catch {
+            return null;
+        }
     },
 
     isAuthenticated: () => {
