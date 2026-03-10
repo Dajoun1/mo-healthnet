@@ -74,9 +74,3 @@ replay_pid*
 
 ## Spring Boot
 spring-boot-devtools.properties
-
-## Application specific
-application.properties
-application-local.properties
-application-dev.properties
-
