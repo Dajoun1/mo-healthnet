@@ -1,30 +1,64 @@
 // App.jsx
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './pages/Navbar';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-// Page Components (create these separately)
-import Home from './pages/Home';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import SignIn from './components/Signin'
-import TestConnection from './pages/TestConnection';
+// Layouts
+import ApplicantLayout from "./layouts/applicantLayout";
+import CaseworkerLayout from "./layouts/caseworkerLayout";
+
+// Public Pages
+import Home from "./pages/applicant/Home";
+import About from "./pages/applicant/About";
+import Signin from "./components/Signin";
+import TestConnection from "./pages/applicant/TestConnection";
+
+// Protected Pages
+import ApplicantDashboard from "./pages/applicant/Dashboard";
+import CaseworkerDashboard from "./pages/caseworker/Dashboard";
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        {/* Add padding-top to prevent content from hiding behind fixed navbar */}
-        <main className="pt-16">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path='/signin' element={<SignIn/>} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/test" element={<TestConnection />} />
-          </Routes>
-        </main>
-      </div>
+      <AuthProvider>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<ApplicantLayout />}>
+            <Route index element={<Home />} />
+            <Route path="signin" element={<Signin />} />
+            <Route path="about" element={<About />} />
+            <Route path="test" element={<TestConnection />} />
+          </Route>
+
+          <Route path="/signin" element={<Signin />} />
+
+          {/* Protected Applicant Routes */}
+          <Route
+            path="/applicant"
+            element={
+              <ProtectedRoute allowedRoles={["applicant"]}>
+                <ApplicantLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="dashboard" element={<ApplicantDashboard />} />
+            {/* Will add more applicant routes here */}
+          </Route>
+
+          {/* Protected Caseworker Routes */}
+          <Route
+            path="/caseworker"
+            element={
+              <ProtectedRoute allowedRoles={["caseworker"]}>
+                <CaseworkerLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="dashboard" element={<CaseworkerDashboard />} />
+            {/* Will add more caseworker routes here */}
+          </Route>
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }
