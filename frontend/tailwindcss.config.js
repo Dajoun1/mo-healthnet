@@ -38,6 +38,13 @@ export default {
                 'custom-dark': '#121212',
                 'custom-light': '#f8f9fa',
             },
+            fontFamily: {
+                // This creates a new 'roboto' utility class
+                'roboto': ['Roboto', 'sans-serif'],
+
+                // Optional: Replace the default sans font with Roboto
+                'sans': ['Roboto', 'sans-serif'],
+            },
         },
     },
     plugins: [],

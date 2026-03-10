@@ -72,7 +72,7 @@ public class LoginController {
                 response.put("message", "Authentication successful");
                 response.put("success", true);
                 response.put("userId", user.getId());
-                response.put("email", user.getEmail());
+                response.put("email", user.getUsername());
                 response.put("firstName", user.getFirstName());
                 response.put("lastName", user.getLastName());
                 response.put("role", user.getRole());
@@ -148,7 +148,7 @@ public class LoginController {
             response.put("message", "User registered successfully");
             response.put("success", true);
             response.put("userId", user.getId());
-            response.put("email", user.getEmail());
+            response.put("email", user.getUsername());
             LOG.info("User registered successfully: {}", email);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 

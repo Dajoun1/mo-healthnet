@@ -32,7 +32,7 @@ public class AuthenticationService {
      * Email is used as the username for portal login.
      *
      * @param email the user's email (used for portal login as username)
-     * @param password the plaintext password to be hashed
+     * @param passwordHash the plaintext password to be hashed
      * @param firstName the user's first name
      * @param middleName the user's middle name (optional)
      * @param lastName the user's last name
@@ -43,17 +43,18 @@ public class AuthenticationService {
      * @return the created User entity
      * @throws IllegalArgumentException if email already exists
      */
-    public User registerUser(String email, String password, String firstName,
+    public User registerUser(String email, String passwordHash, String firstName,
                             String middleName, String lastName, LocalDate birthDate,
                             String ssn, String phone, User.UserRole role) {
 
-        if (userRepository.existsByEmail(email)) {
+        if (userRepository.existsByUsername(email)) {
             throw new IllegalArgumentException("Email already registered: " + email);
         }
 
         User user = new User();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password)); // Hash password with bcrypt
+        // Email is persisted in username for login identity.
+        user.setUsername(email);
+        user.setPasswordHash(passwordEncoder.encode(passwordHash)); // Hash password with bcrypt
         user.setFirstName(firstName);
         user.setMiddleName(middleName);
         user.setLastName(lastName);
@@ -77,7 +78,7 @@ public class AuthenticationService {
      * @return true if credentials are valid, false otherwise
      */
     public boolean authenticateUser(String email, String password) {
-        Optional<User> userOptional = userRepository.findByEmail(email);
+        Optional<User> userOptional = userRepository.findByUsername(email);
 
         if (userOptional.isEmpty()) {
             LOG.warn("Login attempt with non-existent email: {}", email);
@@ -87,7 +88,7 @@ public class AuthenticationService {
         User user = userOptional.get();
 
         // Compare plaintext password with stored bcrypt hash
-        boolean isPasswordValid = passwordEncoder.matches(password, user.getPassword());
+        boolean isPasswordValid = passwordEncoder.matches(password, user.getPasswordHash());
 
         if (isPasswordValid) {
             // Update last login timestamp
@@ -108,7 +109,7 @@ public class AuthenticationService {
      * @return Optional containing the user if found
      */
     public Optional<User> findUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByUsername(email);
     }
 
     /**
@@ -120,7 +121,7 @@ public class AuthenticationService {
      * @return true if password changed successfully, false otherwise
      */
     public boolean changePassword(String email, String oldPassword, String newPassword) {
-        Optional<User> userOptional = userRepository.findByEmail(email);
+        Optional<User> userOptional = userRepository.findByUsername(email);
 
         if (userOptional.isEmpty()) {
             return false;
@@ -129,17 +130,16 @@ public class AuthenticationService {
         User user = userOptional.get();
 
         // Verify old password
-        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+        if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
             LOG.warn("Password change attempted with incorrect old password for: {}", email);
             return false;
         }
 
         // Set new hashed password
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
         LOG.info("Password changed successfully for user: {}", email);
         return true;
     }
 }
-
