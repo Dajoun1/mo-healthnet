@@ -17,7 +17,7 @@ public class TestPasswordHashGenerator {
         SecureRandom secureRandom = new SecureRandom("testSeed123".getBytes());
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10, secureRandom);
 
-        // Generate hashes for common test passwords
+        // Generate hashes for test passwords
         String[] testPasswords = {"applicant123", "admin123", "caseworker123"};
 
         System.out.println("===========================================");

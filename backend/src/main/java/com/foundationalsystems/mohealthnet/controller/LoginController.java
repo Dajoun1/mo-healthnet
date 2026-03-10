@@ -34,7 +34,7 @@ public class LoginController {
     @GetMapping("/login")
     public String login() {
         LOG.info("GET /auth/login endpoint called");
-        return "Testing login endpoint";
+        return "Testing login endpoint! Hello class!";
     }
 
     /**

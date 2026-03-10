@@ -39,7 +39,7 @@ export const authService = {
     // Test function to verify backend connection
     testLogin: async () => {
         try {
-            const response = await api.get('/login');
+            const response = await api.get('/auth/login');
             return response.data;
         } catch (error) {
             throw error.response?.data || { message: 'Connection failed' };
