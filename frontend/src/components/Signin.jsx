@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authService } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 const Signin = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -12,7 +13,7 @@ const Signin = () => {
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    const { name, value } = e.target; // Fixed: use name instead of type
+    const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value,
@@ -26,9 +27,20 @@ const Signin = () => {
     setError("");
 
     try {
-      const response = await authService.login(formData);
-      console.log("Login successful:", response);
-      navigate("/");
+      const result = await login(formData);
+      if (result.success) {
+        // Redirect based on role
+        const userRole = result.data.user?.role;
+        if (userRole === 'applicant') {
+          navigate('/applicant/dashboard');
+        } else if (userRole === 'caseworker') {
+          navigate('/caseworker/dashboard');
+        } else {
+          navigate('/');
+        }
+      } else {
+        setError(result.error || "Invalid email or password");
+      }
     } catch (err) {
       setError(err.message || "Invalid email or password");
     } finally {
@@ -39,7 +51,7 @@ const Signin = () => {
   return (
     <div className="flex items-center justify-center w-screen h-screen bg-gray-100">
       <div className="flex flex-col items-center w-full gap-4 p-8 m-6 bg-white rounded-lg shadow-md lg:w-1/3 md:w-1/2 sm:w-2/3">
-        <h1 className="font-sans opacity-60">Applicant Login</h1>
+        <h1 className="font-sans font-semibold opacity-70">Missouri Medicaid Login</h1>
 
         {error && (
           <div
@@ -53,7 +65,7 @@ const Signin = () => {
         <form onSubmit={handleSubmit} className="flex flex-col w-full gap-2">
           <input
             data-testid="email-input"
-            className="w-full px-5 py-2 mt-2 text-sm border rounded-md border-slate-300 focus:outline-[#1196d4]"
+            className="w-full px-5 py-2 mt-2 text-sm border rounded-md border-slate-300 focus:outline-[#52acd6]"
             type="email"
             name="email"
             placeholder="name@example.com"
@@ -64,7 +76,7 @@ const Signin = () => {
           />
           <input
             data-testid="password-input"
-            className="w-full px-5 py-2 mt-2 text-sm border rounded-md border-slate-300 focus:outline-[#1196d4]"
+            className="w-full px-5 py-2 mt-2 text-sm border rounded-md border-slate-300 focus:outline-[#52acd6]"
             type="password"
             name="password"
             placeholder="Enter your password"

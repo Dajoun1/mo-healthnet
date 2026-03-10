@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 const api = axios.create({
@@ -36,7 +35,6 @@ api.interceptors.response.use(
 );
 
 export const authService = {
-    // Test function to verify backend connection
     testLogin: async () => {
         try {
             const response = await api.get('/login');
@@ -75,6 +73,12 @@ export const authService = {
 
     isAuthenticated: () => {
         return !!localStorage.getItem('token');
+    },
+
+    // Helper to get user role
+    getUserRole: () => {
+        const user = authService.getCurrentUser();
+        return user?.role || null;
     }
 };
 
