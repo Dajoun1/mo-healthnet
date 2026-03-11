@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import logo from "../../assets/icons/mohealthnet1.png";
+import { useAuth } from "../../context/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -13,8 +17,19 @@ const Navbar = () => {
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
     // { path: "/contact", label: "Contact" },
-    { path: "/signin", label: "Sign In" },
   ];
+
+  const handleAuthAction = () => {
+    if (isAuthenticated) {
+      logout();
+      setIsOpen(false);
+      navigate("/signin");
+      return;
+    }
+
+    setIsOpen(false);
+    navigate("/signin");
+  };
 
   return (
     <nav className="fixed top-0 left-0 z-50 w-full shadow-md bg-[#0078AE]">
@@ -23,7 +38,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img
-              src="src/assets/icons/mohealthnet1.png"
+              src={logo}
               alt="Company Logo"
               className="w-auto h-12"
               data-testid="logo"
@@ -44,6 +59,13 @@ const Navbar = () => {
                 {item.label}
               </NavLink>
             ))}
+            <button
+              type="button"
+              onClick={handleAuthAction}
+              className="px-3 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 rounded-md hover:text-white"
+            >
+              {isAuthenticated ? "Logout" : "Sign In"}
+            </button>
           </div>
 
           {/* Mobile menu button */}
@@ -84,6 +106,13 @@ const Navbar = () => {
               {item.label}
             </NavLink>
           ))}
+          <button
+            type="button"
+            onClick={handleAuthAction}
+            className="block w-full px-3 py-2 text-base font-medium text-left text-gray-700 transition-colors duration-200 rounded-md hover:text-blue-600 hover:bg-blue-50"
+          >
+            {isAuthenticated ? "Logout" : "Sign In"}
+          </button>
         </div>
       </div>
     </nav>

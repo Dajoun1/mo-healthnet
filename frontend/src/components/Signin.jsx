@@ -1,16 +1,36 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+const normalizeRole = (role) => (role || "").toString().trim().toLowerCase();
+
+const getDashboardRouteForRole = (role) => {
+  const normalizedRole = normalizeRole(role);
+
+  if (normalizedRole === "applicant") return "/applicant/dashboard";
+  if (normalizedRole === "caseworker" || normalizedRole === "employee") {
+    return "/caseworker/dashboard";
+  }
+  if (normalizedRole === "admin") return "/";
+
+  return "/";
+};
+
 const Signin = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(getDashboardRouteForRole(user?.role), { replace: true });
+    }
+  }, [isAuthenticated, user?.role, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,21 +48,31 @@ const Signin = () => {
 
     try {
       const result = await login(formData);
-      if (result.success) {
-        // Redirect based on role
-        const userRole = result.data.user?.role;
-        if (userRole === 'applicant') {
-          navigate('/applicant/dashboard');
-        } else if (userRole === 'caseworker') {
-          navigate('/caseworker/dashboard');
-        } else {
-          navigate('/');
-        }
+      const backendSuccess = result?.data?.success;
+      const isLoginSuccessful =
+        result?.success === true &&
+        (backendSuccess === undefined || backendSuccess === true);
+
+      if (isLoginSuccessful) {
+        const userRole =
+          result?.data?.user?.role ??
+          result?.data?.role ??
+          result?.data?.userRole ??
+          user?.role;
+
+        navigate(getDashboardRouteForRole(userRole), { replace: true });
       } else {
-        setError(result.error || "Invalid email or password");
+        setError(
+          result?.error ||
+            result?.data?.message ||
+            "Login failed. Please check your email and password and try again."
+        );
       }
     } catch (err) {
-      setError(err.message || "Invalid email or password");
+      setError(
+        err.message ||
+          "Login failed. Please check your email and password and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -51,7 +81,9 @@ const Signin = () => {
   return (
     <div className="flex items-center justify-center w-screen h-screen bg-gray-100">
       <div className="flex flex-col items-center w-full gap-4 p-8 m-6 bg-white rounded-lg shadow-md lg:w-1/3 md:w-1/2 sm:w-2/3">
-        <h1 className="font-sans font-semibold opacity-70">Missouri Medicaid Login</h1>
+        <h1 className="font-sans font-semibold opacity-70">
+          Missouri Medicaid Login
+        </h1>
 
         {error && (
           <div

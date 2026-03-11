@@ -2,6 +2,12 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
+const normalizeRole = (role) => {
+    const value = (role || '').toString().trim();
+    if (!value) return null;
+    return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+};
+
 const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
@@ -25,7 +31,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
+        const status = error.response?.status;
+        const requestUrl = error.config?.url || '';
+
+        // Let the sign-in form handle invalid credentials inline.
+        if (status === 401 && !requestUrl.includes('/auth/login')) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = '/signin';
@@ -47,11 +57,28 @@ export const authService = {
     login: async (credentials) => {
         try {
             const response = await api.post('/auth/login', credentials);
+
+            const responseUser = response.data.user || {
+                role: response.data.role,
+                username: response.data.email,
+                firstName: response.data.firstName,
+                lastName: response.data.lastName,
+            };
+
+            const user = {
+                ...responseUser,
+                role: normalizeRole(responseUser.role),
+            };
+
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
-                localStorage.setItem('user', JSON.stringify(response.data.user));
             }
-            return response.data;
+            localStorage.setItem('user', JSON.stringify(user));
+
+            return {
+                ...response.data,
+                user,
+            };
         } catch (error) {
             throw error.response?.data || { message: 'Login failed' };
         }
@@ -72,7 +99,7 @@ export const authService = {
     },
 
     isAuthenticated: () => {
-        return !!localStorage.getItem('token');
+        return !!localStorage.getItem('user') || !!localStorage.getItem('token');
     },
 
     // Helper to get user role
