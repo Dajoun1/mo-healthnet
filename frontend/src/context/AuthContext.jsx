@@ -13,7 +13,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Check for existing user on mount
@@ -22,10 +22,10 @@ export const AuthProvider = ({ children }) => {
     if (currentUser) {
       setUser(currentUser);
     }
+    setLoading(false);
   }, []);
 
   const login = async (credentials) => {
-    setLoading(true);
     setError(null);
     try {
       const response = await authService.login(credentials);
@@ -35,8 +35,6 @@ export const AuthProvider = ({ children }) => {
       const errorMessage = err.message || "Login failed";
       setError(errorMessage);
       return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
     }
   };
 

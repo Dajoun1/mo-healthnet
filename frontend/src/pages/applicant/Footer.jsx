@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebook, faTwitter, faLinkedin } from "@fortawesome/free-brands-svg-icons";
+import logo from "../../assets/icons/mohealthnet1.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -14,7 +15,7 @@ const Footer = () => {
           <div className="text-center sm:text-left">
             <div className="flex justify-center sm:justify-start">
               <img
-                src="src/assets/icons/mohealthnet1.png"
+                src={logo}
                 alt="Company Logo"
                 className="w-auto h-12 mb-4 brightness-0 invert"
               />

@@ -4,8 +4,8 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Layouts
-import ApplicantLayout from "./layouts/applicantLayout";
-import CaseworkerLayout from "./layouts/caseworkerLayout";
+import ApplicantLayout from "./layouts/ApplicantLayout";
+import CaseworkerLayout from "./layouts/CaseworkerLayout";
 
 // Public Pages
 import Home from "./pages/applicant/Home";
@@ -36,7 +36,7 @@ function App() {
           <Route
             path="/applicant"
             element={
-              <ProtectedRoute allowedRoles={["applicant"]}>
+              <ProtectedRoute allowedRoles={["applicant", "Applicant"]}>
                 <ApplicantLayout />
               </ProtectedRoute>
             }
@@ -49,7 +49,9 @@ function App() {
           <Route
             path="/caseworker"
             element={
-              <ProtectedRoute allowedRoles={["caseworker"]}>
+              <ProtectedRoute
+                allowedRoles={["caseworker", "Caseworker", "employee", "Employee"]}
+              >
                 <CaseworkerLayout />
               </ProtectedRoute>
             }

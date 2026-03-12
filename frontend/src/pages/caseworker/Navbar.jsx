@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../../context/AuthContext";
+import logo from "../../assets/icons/mohealthnet1.png";
 
 const CaseworkerNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +31,7 @@ const CaseworkerNavbar = () => {
         <div className="flex items-center justify-between h-16">
           <Link to="/caseworker/dashboard" className="flex items-center">
             <img
-              src="src/assets/icons/mohealthnet1.png"
+              src={logo}
               alt="Company Logo"
               className="w-auto h-12"
             />

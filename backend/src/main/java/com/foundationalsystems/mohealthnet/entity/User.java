@@ -24,10 +24,10 @@ public class User {
     private Integer id;
 
     @Column(nullable = false, unique = true, length = 50)
-    private String email; // Serves as the unique username for portal login
+    private String username; // Serves as the unique username for portal login
 
-    @Column(nullable = false)
-    private String password; // Stores bcrypt-hashed password (CHAR() recommended for hash length)
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash; // Stores bcrypt-hashed password (CHAR() recommended for hash length)
 
     @Column(name = "first_name", nullable = false, length = 50)
     private String firstName;
