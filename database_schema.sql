@@ -57,7 +57,7 @@ CREATE TABLE Login_Attempt (
     FOREIGN KEY (user_id) REFERENCES User(id)
 );
 
-
+-- password for each is "pass123"
 INSERT INTO User VALUES (NULL,'johndoe@example.com', '$2a$10$cvFfC/237EGbt5l0t3oumu3EmxCBPX.pl8D3OveOx707g4kET6DVO', 'John', NULL, 'Doe', '1990-01-01', '123456789', '5551234567', 'Employee', NULL, NULL);
 INSERT INTO User VALUES (NULL,'janedoe@example.com', '$2a$10$gsVts3fytdh9nHp.nUXfVuiSzkp9x9vOQoqlQ7qZAaVWlwdTIv7oy', 'Jane', NULL, 'Doe', '1992-01-01', '023456789', '5551234521', 'Admin', NULL, NULL);
 INSERT INTO User VALUES (NULL,'Stevendoe@example.com', '$2a$10$TNYeCGntmMr8SJIJsD60DuMSkMnKtE/.8F65pYqIV4OYmD.rgkTsi', 'Steven', NULL, 'Doe', '1991-01-04', '223456789', '5551234543', 'Applicant', NULL, NULL);
