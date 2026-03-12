@@ -31,7 +31,7 @@ class LoginControllerTest {
         // Arrange
         User mockUser = new User();
         mockUser.setId(1);
-        mockUser.setEmail("test@example.com");
+        mockUser.setUsername("test@example.com");
         mockUser.setFirstName("Test");
         mockUser.setLastName("User");
         mockUser.setRole(User.UserRole.Applicant);
