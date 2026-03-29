@@ -28,6 +28,68 @@ public class AuthenticationService {
     private PasswordEncoder passwordEncoder;
 
     /**
+     * Register a new user with minimal information (progressive profiling).
+     * Only requires email, password, first name, and last name.
+     * SSN and birth date are optional and can be added later.
+     *
+     * @param email the user's email (used for portal login as username)
+     * @param passwordHash the plaintext password to be hashed
+     * @param firstName the user's first name
+     * @param lastName the user's last name
+     * @param role the user's role (Applicant, Employee, or Admin)
+     * @return the created User entity with profileComplete = false
+     * @throws IllegalArgumentException if email already exists
+     */
+    public User registerUserMinimal(String email, String passwordHash, String firstName,
+                                   String lastName, User.UserRole role) {
+
+        if (userRepository.existsByUsername(email)) {
+            throw new IllegalArgumentException("Email already registered: " + email);
+        }
+
+        User user = new User();
+        user.setUsername(email);
+        user.setPasswordHash(passwordEncoder.encode(passwordHash));
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setRole(role != null ? role : User.UserRole.Applicant);
+        user.setProfileComplete(false); // Profile not yet complete
+        user.setCreatedAt(LocalDateTime.now());
+
+        User savedUser = userRepository.save(user);
+        LOG.info("New user registered with minimal info: {}", email);
+        return savedUser;
+    }
+
+    /**
+     * Complete a user's profile by adding sensitive information (SSN, birth date, phone).
+     *
+     * @param email the user's email
+     * @param birthDate the user's birth date
+     * @param ssn the user's SSN (9 chars)
+     * @param phone the user's phone number (optional)
+     * @return the updated User entity with profileComplete = true
+     * @throws IllegalArgumentException if user not found
+     */
+    public User completeUserProfile(String email, LocalDate birthDate, String ssn, String phone) {
+        Optional<User> userOptional = userRepository.findByUsername(email);
+
+        if (userOptional.isEmpty()) {
+            throw new IllegalArgumentException("User not found: " + email);
+        }
+
+        User user = userOptional.get();
+        user.setBirthDate(birthDate);
+        user.setSsn(ssn);
+        user.setPhone(phone);
+        user.setProfileComplete(true);
+
+        User updatedUser = userRepository.save(user);
+        LOG.info("User profile completed: {}", email);
+        return updatedUser;
+    }
+
+    /**
      * Register a new user with bcrypt-hashed password.
      * Email is used as the username for portal login.
      *
@@ -62,6 +124,7 @@ public class AuthenticationService {
         user.setSsn(ssn);
         user.setPhone(phone);
         user.setRole(role != null ? role : User.UserRole.Applicant); // Default to Applicant
+        user.setProfileComplete(true); // Full registration completes profile
         user.setCreatedAt(LocalDateTime.now());
 
         User savedUser = userRepository.save(user);

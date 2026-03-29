@@ -87,47 +87,38 @@ public class LoginController {
     }
 
     /**
-     * Handles POST requests to /auth/register for user registration.
-     * Hashes the password using bcrypt before storing in the database.
-     * Email serves as the username for portal login.
+     * Handles POST requests to /auth/register for user registration (minimal signup).
+     * Uses progressive profiling: collects only email, password, first name, last name.
+     * SSN and birth date collected later via /auth/complete-profile.
      *
-     * @param userData a map containing registration fields
+     * @param userData a map containing registration fields (email, password, firstName, lastName)
      * @return a response with registration status
      */
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> handleRegister(@RequestBody Map<String, Object> userData) {
-        // Extract and validate required fields
+        // Extract required fields for minimal signup
         String email = (String) userData.get("email");
         String password = (String) userData.get("password");
         String firstName = (String) userData.get("firstName");
         String lastName = (String) userData.get("lastName");
-        String birthDateStr = (String) userData.get("birthDate"); // Format: YYYY-MM-DD
-        String ssn = (String) userData.get("ssn");
 
-        // Optional fields
-        String middleName = (String) userData.get("middleName");
-        String phone = (String) userData.get("phone");
+        // Optional role (defaults to Applicant)
         String roleStr = (String) userData.get("role");
 
         // Validate required fields
         if (email == null || email.trim().isEmpty() ||
             password == null || password.isEmpty() ||
             firstName == null || firstName.trim().isEmpty() ||
-            lastName == null || lastName.trim().isEmpty() ||
-            birthDateStr == null || birthDateStr.trim().isEmpty() ||
-            ssn == null || ssn.trim().isEmpty()) {
+            lastName == null || lastName.trim().isEmpty()) {
 
             LOG.warn("Registration attempt with missing required fields");
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "All required fields must be provided: email, password, firstName, lastName, birthDate, ssn");
+            response.put("message", "Email, password, firstName, and lastName are required");
             response.put("success", false);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
         try {
-            // Parse birth date
-            LocalDate birthDate = LocalDate.parse(birthDateStr);
-
             // Parse role (default to Applicant)
             User.UserRole role = User.UserRole.Applicant;
             if (roleStr != null && !roleStr.trim().isEmpty()) {
@@ -138,18 +129,20 @@ public class LoginController {
                 }
             }
 
-            // Email serves as username
-            User user = authenticationService.registerUser(
-                email, password, firstName, middleName, lastName,
-                birthDate, ssn, phone, role
+            // Register user with minimal information
+            User user = authenticationService.registerUserMinimal(
+                email, password, firstName, lastName, role
             );
 
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "User registered successfully");
+            response.put("message", "Account created successfully! Please complete your profile.");
             response.put("success", true);
             response.put("userId", user.getId());
             response.put("email", user.getUsername());
-            LOG.info("User registered successfully: {}", email);
+            response.put("firstName", user.getFirstName());
+            response.put("lastName", user.getLastName());
+            response.put("profileComplete", user.getProfileComplete());
+            LOG.info("User registered successfully (minimal info): {}", email);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (IllegalArgumentException e) {
@@ -158,16 +151,88 @@ public class LoginController {
             response.put("message", e.getMessage());
             response.put("success", false);
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-        } catch (IllegalStateException e) {
-            LOG.warn("Invalid date format: {}", e.getMessage());
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Birth date must be in YYYY-MM-DD format");
-            response.put("success", false);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
             LOG.error("Unexpected error during registration", e);
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Registration failed: " + e.getMessage());
+            response.put("success", false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /**
+     * Handles POST requests to /auth/complete-profile for completing user profile.
+     * Requires authentication (user must be logged in).
+     * Collects SSN, birth date, and phone number.
+     *
+     * @param email the user's email (passed from authenticated request)
+     * @param profileData a map containing SSN, birthDate, phone
+     * @return a response with profile completion status
+     */
+    @PostMapping("/complete-profile")
+    public ResponseEntity<Map<String, Object>> handleCompleteProfile(
+            @RequestHeader(value = "X-User-Email", required = false) String email,
+            @RequestBody Map<String, Object> profileData) {
+
+        // Extract fields
+        String birthDateStr = (String) profileData.get("birthDate"); // Format: YYYY-MM-DD
+        String ssn = (String) profileData.get("ssn");
+        String phone = (String) profileData.get("phone");
+
+        // Validate required fields
+        if (birthDateStr == null || birthDateStr.trim().isEmpty() ||
+            ssn == null || ssn.trim().isEmpty()) {
+
+            LOG.warn("Profile completion attempt with missing required fields");
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Birth date and SSN are required");
+            response.put("success", false);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        try {
+            // Parse birth date
+            LocalDate birthDate = LocalDate.parse(birthDateStr);
+
+            // Get email from request (for now, from header; in production use security context)
+            // This should be extracted from the authenticated user in real implementation
+            String userEmail = email;
+            if (userEmail == null || userEmail.trim().isEmpty()) {
+                userEmail = (String) profileData.get("email");
+            }
+
+            if (userEmail == null || userEmail.trim().isEmpty()) {
+                LOG.warn("Profile completion: user email not provided");
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "User not authenticated");
+                response.put("success", false);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+            // Complete user profile
+            User user = authenticationService.completeUserProfile(
+                userEmail, birthDate, ssn, phone
+            );
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Profile completed successfully");
+            response.put("success", true);
+            response.put("userId", user.getId());
+            response.put("email", user.getUsername());
+            response.put("profileComplete", user.getProfileComplete());
+            LOG.info("User profile completed: {}", userEmail);
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Profile completion failed: {}", e.getMessage());
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", e.getMessage());
+            response.put("success", false);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            LOG.error("Unexpected error during profile completion", e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Profile completion failed: " + e.getMessage());
             response.put("success", false);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }

@@ -11,6 +11,7 @@ export const useAuth = () => {
   return context;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -18,6 +19,7 @@ export const AuthProvider = ({ children }) => {
 
   // Check for existing user on mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     const currentUser = authService.getCurrentUser();
     if (currentUser) {
       setUser(currentUser);

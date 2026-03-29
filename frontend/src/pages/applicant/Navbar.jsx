@@ -24,11 +24,7 @@ const Navbar = () => {
       logout();
       setIsOpen(false);
       navigate("/signin");
-      return;
     }
-
-    setIsOpen(false);
-    navigate("/signin");
   };
 
   return (
@@ -59,13 +55,22 @@ const Navbar = () => {
                 {item.label}
               </NavLink>
             ))}
-            <button
-              type="button"
-              onClick={handleAuthAction}
-              className="px-3 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 rounded-md hover:text-white"
-            >
-              {isAuthenticated ? "Logout" : "Sign In"}
-            </button>
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={handleAuthAction}
+                className="px-3 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 rounded-md hover:text-white"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                to="/signin"
+                className="px-3 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 rounded-md hover:text-white"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -106,13 +111,23 @@ const Navbar = () => {
               {item.label}
             </NavLink>
           ))}
-          <button
-            type="button"
-            onClick={handleAuthAction}
-            className="block w-full px-3 py-2 text-base font-medium text-left text-gray-700 transition-colors duration-200 rounded-md hover:text-blue-600 hover:bg-blue-50"
-          >
-            {isAuthenticated ? "Logout" : "Sign In"}
-          </button>
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={handleAuthAction}
+              className="block w-full px-3 py-2 text-base font-medium text-left text-gray-700 transition-colors duration-200 rounded-md hover:text-blue-600 hover:bg-blue-50"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              to="/signin"
+              onClick={toggleMenu}
+              className="block w-full px-3 py-2 text-base font-medium text-left text-gray-700 transition-colors duration-200 rounded-md hover:text-blue-600 hover:bg-blue-50"
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </nav>
