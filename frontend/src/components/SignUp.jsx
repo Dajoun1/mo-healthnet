@@ -5,7 +5,7 @@ import { authService } from "../services/api";
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, registerAndLogin } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -93,13 +93,12 @@ const SignUp = () => {
       const response = await authService.register(registrationData);
 
       if (response.success) {
-        setSuccess("Account created! Redirecting to complete your profile...");
-        // Store user info for profile completion page
+        // Immediately authenticate the user so they stay logged in
+        // through the complete-profile step and beyond.
+        registerAndLogin(response);
+        // Store email so CompleteProfile can send it to the backend
         localStorage.setItem("pendingUserEmail", formData.email.toLowerCase());
-        // Redirect to profile completion page
-        setTimeout(() => {
-          navigate("/applicant/complete-profile", { replace: true });
-        }, 2000);
+        navigate("/applicant/complete-profile", { replace: true });
       } else {
         setError(response.message || "Registration failed. Please try again.");
       }

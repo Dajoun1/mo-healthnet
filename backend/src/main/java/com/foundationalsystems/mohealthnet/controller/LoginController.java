@@ -152,9 +152,9 @@ public class LoginController {
             response.put("success", false);
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         } catch (Exception e) {
-            LOG.error("Unexpected error during registration", e);
+            LOG.error("Unexpected error during registration for email {}: {}", email, e.getMessage(), e);
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Registration failed: " + e.getMessage());
+            response.put("message", "Registration failed. Please try again or contact support.");
             response.put("success", false);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
@@ -230,9 +230,9 @@ public class LoginController {
             response.put("success", false);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         } catch (Exception e) {
-            LOG.error("Unexpected error during profile completion", e);
+            LOG.error("Unexpected error during profile completion for user {}: {}", email, e.getMessage(), e);
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Profile completion failed: " + e.getMessage());
+            response.put("message", "Profile completion failed. Please try again or contact support.");
             response.put("success", false);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }

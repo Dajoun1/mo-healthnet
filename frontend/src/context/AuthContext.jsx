@@ -40,6 +40,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /**
+   * Called after a successful registration response.
+   * Builds a user object from the registration payload, persists it to
+   * localStorage (same shape as login), and hydrates AuthContext state so
+   * the user is immediately authenticated without a second login round-trip.
+   */
+  const registerAndLogin = (registrationResponse) => {
+    const user = {
+      id: registrationResponse.userId,
+      username: registrationResponse.email,
+      role: registrationResponse.role || "Applicant",
+      firstName: registrationResponse.firstName,
+      lastName: registrationResponse.lastName,
+      profileComplete: registrationResponse.profileComplete ?? false,
+    };
+    localStorage.setItem("user", JSON.stringify(user));
+    setUser(user);
+    return user;
+  };
+
   const logout = () => {
     authService.logout();
     setUser(null);
@@ -50,6 +70,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     login,
+    registerAndLogin,
     logout,
     isAuthenticated: !!user,
   };

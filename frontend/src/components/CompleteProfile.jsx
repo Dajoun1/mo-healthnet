@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 
 const CompleteProfile = () => {
   const navigate = useNavigate();
+  const { user, registerAndLogin } = useAuth();
   const [formData, setFormData] = useState({
     birthDate: "",
     ssn: "",
@@ -14,18 +16,19 @@ const CompleteProfile = () => {
   const [success, setSuccess] = useState("");
   const [userEmail, setUserEmail] = useState("");
 
-  // On mount, get user email and redirect if already has complete profile
+  // On mount, resolve the user's email from auth context or localStorage fallback
   useEffect(() => {
-    // Try to get email from localStorage (set during signup)
-    const email = localStorage.getItem("pendingUserEmail");
+    const emailFromContext = user?.username;
+    const emailFromStorage = localStorage.getItem("pendingUserEmail");
+    const email = emailFromContext || emailFromStorage;
 
     if (email) {
       setUserEmail(email);
     } else {
-      // No email found, redirect to signup
+      // No authenticated user and no pending email — send back to signup
       navigate("/signup", { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -91,6 +94,10 @@ const CompleteProfile = () => {
         setSuccess("Profile completed successfully! You can now create applications.");
         // Clear the pending email from localStorage
         localStorage.removeItem("pendingUserEmail");
+        // Update the user's profileComplete flag in AuthContext + localStorage
+        if (user) {
+          registerAndLogin({ ...user, profileComplete: true, userId: user.id });
+        }
         // Redirect to dashboard after a short delay
         setTimeout(() => {
           navigate("/applicant/dashboard", { replace: true });
