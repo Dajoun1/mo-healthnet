@@ -1,10 +1,12 @@
 
 
 // pages/Home.jsx
+import React from "react";
+import ActionCards from "./ActionCards";
 const Home = () => {
   return (
     <div className="container px-4  mx-auto min-h-screen flex items-center justify-center">
-      <h1>Welcome to Our App</h1>
+      <ActionCards />
     </div>
   );
 };
