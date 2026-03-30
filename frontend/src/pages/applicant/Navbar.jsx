@@ -13,22 +13,24 @@ const Navbar = () => {
     setIsOpen(!isOpen);
   };
 
-  const navItems = [
+8  // Authenticated users' "Home" is the dashboard, not the marketing landing page.
+  const publicNavItems = [
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
-    // { path: "/contact", label: "Contact" },
   ];
+
+  const authedNavItems = [
+    { path: "/applicant/dashboard", label: "Dashboard" },
+  ];
+
+  const navItems = isAuthenticated ? authedNavItems : publicNavItems;
 
   const handleAuthAction = () => {
     if (isAuthenticated) {
       logout();
       setIsOpen(false);
       navigate("/signin");
-      return;
     }
-
-    setIsOpen(false);
-    navigate("/signin");
   };
 
   return (
@@ -36,7 +38,7 @@ const Navbar = () => {
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <Link to={isAuthenticated ? "/applicant/dashboard" : "/"} className="flex items-center">
             <img
               src={logo}
               alt="Company Logo"
@@ -59,13 +61,22 @@ const Navbar = () => {
                 {item.label}
               </NavLink>
             ))}
-            <button
-              type="button"
-              onClick={handleAuthAction}
-              className="px-3 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 rounded-md hover:text-white"
-            >
-              {isAuthenticated ? "Logout" : "Sign In"}
-            </button>
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={handleAuthAction}
+                className="px-3 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 rounded-md hover:text-white"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                to="/signin"
+                className="px-3 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 rounded-md hover:text-white"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -106,13 +117,23 @@ const Navbar = () => {
               {item.label}
             </NavLink>
           ))}
-          <button
-            type="button"
-            onClick={handleAuthAction}
-            className="block w-full px-3 py-2 text-base font-medium text-left text-gray-700 transition-colors duration-200 rounded-md hover:text-blue-600 hover:bg-blue-50"
-          >
-            {isAuthenticated ? "Logout" : "Sign In"}
-          </button>
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={handleAuthAction}
+              className="block w-full px-3 py-2 text-base font-medium text-left text-gray-700 transition-colors duration-200 rounded-md hover:text-blue-600 hover:bg-blue-50"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              to="/signin"
+              onClick={toggleMenu}
+              className="block w-full px-3 py-2 text-base font-medium text-left text-gray-700 transition-colors duration-200 rounded-md hover:text-blue-600 hover:bg-blue-50"
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </nav>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const normalizeRole = (role) => (role || "").toString().trim().toLowerCase();
@@ -132,6 +132,13 @@ const Signin = () => {
           >
             {loading ? "Signing In..." : "Sign In"}
           </button>
+
+          <p className="mt-2 text-sm text-center text-gray-600">
+            New here?{" "}
+            <Link to="/signup" className="font-semibold text-[#0078AE] hover:underline">
+              Create an account
+            </Link>
+          </p>
         </form>
       </div>
     </div>
