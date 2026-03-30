@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 com\foundationalsystems\mohealthnet\config\CorsConfig.class
 com\foundationalsystems\mohealthnet\config\WebConfig.class
 com\foundationalsystems\mohealthnet\config\SecurityConfig.class
@@ -7,3 +8,8 @@ com\foundationalsystems\mohealthnet\entity\User.class
 com\foundationalsystems\mohealthnet\controller\LoginController.class
 com\foundationalsystems\mohealthnet\entity\User$UserRole.class
 com\foundationalsystems\mohealthnet\repository\UserRepository.class
+=======
+com\foundationalsystems\mohealthnet\config\WebConfig.class
+com\foundationalsystems\mohealthnet\controller\LoginController.class
+com\foundationalsystems\mohealthnet\MoHealthNetApplication.class
+>>>>>>> develop
