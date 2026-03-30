@@ -109,6 +109,7 @@ export const authService = {
     }
 };
 
+<<<<<<< HEAD
 
 export const applicationService = {
     /**
@@ -176,4 +177,6 @@ export const applicationService = {
     },
 };
 
+=======
+>>>>>>> develop
 export default api;

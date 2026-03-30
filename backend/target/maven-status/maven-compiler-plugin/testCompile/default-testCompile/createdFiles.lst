@@ -1,3 +1,6 @@
 com\foundationalsystems\mohealthnet\controller\LoginControllerTest.class
+<<<<<<< HEAD
 com\foundationalsystems\mohealthnet\util\TestPasswordHashGenerator.class
 com\foundationalsystems\mohealthnet\config\TestSecurityConfig.class
+=======
+>>>>>>> develop

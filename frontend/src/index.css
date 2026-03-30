@@ -1,5 +1,6 @@
 /* src/index.css - THIS IS THE CORRECT V4 SYNTAX */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+<<<<<<< HEAD
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 @import '@fortawesome/fontawesome-free/css/all.min.css';
 
@@ -11,13 +12,24 @@
   --font-inter: "Inter", "sans-serif";
 }
 
+=======
+
+@import "tailwindcss";
+
+@theme {
+    --font-inter: "Inter", "sans-serif";
+}
+>>>>>>> develop
 /* Add to your index.css or component styles */
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(20px);
   }
+<<<<<<< HEAD
 
+=======
+>>>>>>> develop
   to {
     opacity: 1;
     transform: translateY(0);
@@ -26,6 +38,7 @@
 
 .contact-card {
   animation: fadeIn 0.5s ease-out forwards;
+<<<<<<< HEAD
 }
 
 @layer base {
@@ -85,4 +98,6 @@
   .step-indicator-inactive {
     @apply w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-medium;
   }
+=======
+>>>>>>> develop
 }

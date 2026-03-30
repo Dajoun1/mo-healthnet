@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
@@ -16,11 +17,17 @@ import {
   ClockIcon,
   CheckBadgeIcon,
 } from "@heroicons/react/24/outline";
+=======
+import { useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+>>>>>>> develop
 import logo from "../../assets/icons/mohealthnet1.png";
 import { useAuth } from "../../context/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+<<<<<<< HEAD
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -111,10 +118,34 @@ const Navbar = () => {
   };
 
   const handleSignIn = () => {
+=======
+  const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const navItems = [
+    { path: "/", label: "Home" },
+    { path: "/about", label: "About" },
+    // { path: "/contact", label: "Contact" },
+  ];
+
+  const handleAuthAction = () => {
+    if (isAuthenticated) {
+      logout();
+      setIsOpen(false);
+      navigate("/signin");
+      return;
+    }
+
+>>>>>>> develop
     setIsOpen(false);
     navigate("/signin");
   };
 
+<<<<<<< HEAD
   const handleSignUp = () => {
     setIsOpen(false);
     navigate("/signup");
@@ -145,20 +176,39 @@ const Navbar = () => {
               src={logo}
               alt="MO HealthNet"
               className="w-auto h-10 lg:h-12"
+=======
+  return (
+    <nav className="fixed top-0 left-0 z-50 w-full shadow-md bg-[#0078AE]">
+      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center">
+            <img
+              src={logo}
+              alt="Company Logo"
+              className="w-auto h-12"
+>>>>>>> develop
               data-testid="logo"
             />
           </Link>
 
+<<<<<<< HEAD
           {/* Desktop Navigation */}
           <div
             className="hidden items-center space-x-1 lg:flex"
             data-testid="desktop-menu"
           >
             {navItemsToShow.map((item) => (
+=======
+          {/* Desktop Menu */}
+          <div className="hidden space-x-8 md:flex" data-testid="desktop-menu">
+            {navItems.map((item) => (
+>>>>>>> develop
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
+<<<<<<< HEAD
                   `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
                   ${
                     isActive
@@ -316,11 +366,28 @@ const Navbar = () => {
                 </button>
               </div>
             )}
+=======
+                  `px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200
+                  ${isActive ? "text-white" : "text-gray-700 hover:text-white"}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+            <button
+              type="button"
+              onClick={handleAuthAction}
+              className="px-3 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 rounded-md hover:text-white"
+            >
+              {isAuthenticated ? "Logout" : "Sign In"}
+            </button>
+>>>>>>> develop
           </div>
 
           {/* Mobile menu button */}
           <button
             onClick={toggleMenu}
+<<<<<<< HEAD
             className="p-2 text-white rounded-lg lg:hidden hover:bg-white/10 focus:outline-none transition-colors"
             data-testid="mobile-menu-button"
           >
@@ -328,11 +395,21 @@ const Navbar = () => {
               <XMarkIcon className="w-6 h-6" />
             ) : (
               <Bars3Icon className="w-6 h-6" />
+=======
+            className="p-2 text-gray-700 rounded-md md:hidden hover:text-blue-600 hover:bg-blue-50 focus:outline-none"
+            data-testid="mobile-menu-button"
+          >
+            {isOpen ? (
+              <XMarkIcon className="w-6 h-6" data-testid="close-icon" />
+            ) : (
+              <Bars3Icon className="w-6 h-6" data-testid="menu-icon" />
+>>>>>>> develop
             )}
           </button>
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* Mobile Menu with improved design */}
       <div
         className={`lg:hidden transition-all duration-300 ease-in-out ${
@@ -439,6 +516,38 @@ const Navbar = () => {
               </div>
             )}
           </div>
+=======
+      {/* Mobile Menu */}
+      <div
+        className={`md:hidden ${isOpen ? "block" : "hidden"}`}
+        data-testid="mobile-menu"
+      >
+        <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              onClick={toggleMenu}
+              className={({ isActive }) =>
+                `block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200
+                ${
+                  isActive
+                    ? "text-blue-600 bg-blue-50"
+                    : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                }`
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+          <button
+            type="button"
+            onClick={handleAuthAction}
+            className="block w-full px-3 py-2 text-base font-medium text-left text-gray-700 transition-colors duration-200 rounded-md hover:text-blue-600 hover:bg-blue-50"
+          >
+            {isAuthenticated ? "Logout" : "Sign In"}
+          </button>
+>>>>>>> develop
         </div>
       </div>
     </nav>
