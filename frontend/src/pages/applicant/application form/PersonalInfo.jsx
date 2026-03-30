@@ -42,8 +42,7 @@ const PersonalInfo = ({ formData, onChange, onBlur, errors, touched }) => {
               <span className="text-red-500 ml-1">*</span>
             </span>
             <p className="text-sm text-gray-600 mt-1">
-              This health insurance program is exclusively available to Missouri
-              residents.
+              This program is only available to Missouri residents.
             </p>
             {errors.isMissouriResident && touched.isMissouriResident && (
               <p className="text-red-600 text-sm mt-2 flex items-center gap-1">
@@ -79,7 +78,7 @@ const PersonalInfo = ({ formData, onChange, onBlur, errors, touched }) => {
               onChange={onChange}
               onBlur={() => onBlur("firstName")}
               className={inputClass("firstName")}
-              placeholder="John"
+              placeholder="first name"
             />
             {errors.firstName && touched.firstName && (
               <p className="text-red-500 text-sm mt-2">{errors.firstName}</p>
@@ -97,7 +96,7 @@ const PersonalInfo = ({ formData, onChange, onBlur, errors, touched }) => {
               onChange={onChange}
               onBlur={() => onBlur("lastName")}
               className={inputClass("lastName")}
-              placeholder="Doe"
+              placeholder="last name"
             />
             {errors.lastName && touched.lastName && (
               <p className="text-red-500 text-sm mt-2">{errors.lastName}</p>
@@ -135,7 +134,7 @@ const PersonalInfo = ({ formData, onChange, onBlur, errors, touched }) => {
               onBlur={() => onBlur("householdSize")}
               min="1"
               className={inputClass("householdSize")}
-              placeholder="Number of family members"
+              placeholder="family members"
             />
             {errors.householdSize && touched.householdSize && (
               <p className="text-red-500 text-sm mt-2">

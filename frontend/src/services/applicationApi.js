@@ -3,11 +3,11 @@ import api from './api';
 
 export const applicationApi = {
     /**
-     * Submit health insurance application
+     * Submit application
      */
     submitApplication: async (formData) => {
         try {
-            const response = await api.post('/api/health-insurance/apply', formData, {
+            const response = await api.post('/api/example/apply', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

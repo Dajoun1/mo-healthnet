@@ -55,7 +55,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/95 backdrop-blur-xl border border-white/20 shadow-md;
+    @apply bg-white/95 backdrop-blur-xl border border-white/20 shadow-lg;
   }
 
   .input-modern {
