@@ -62,8 +62,12 @@ const Navbar = () => {
   // Navigation items with icons
   const navItems = [
     { path: "/", label: "Home", icon: HomeIcon },
-    { path: "/Application", label: "Apply", icon: ClipboardDocumentListIcon },
-    { path: "/Status", label: "Status", icon: ChartBarIcon },
+    {
+      path: "/Application",
+      label: "Application",
+      icon: ClipboardDocumentListIcon,
+    },
+    { path: "/status", label: "Status", icon: ChartBarIcon },
   ];
 
   // Authenticated nav items
