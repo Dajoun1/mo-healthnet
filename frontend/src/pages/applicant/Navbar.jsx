@@ -13,11 +13,17 @@ const Navbar = () => {
     setIsOpen(!isOpen);
   };
 
-  const navItems = [
+8  // Authenticated users' "Home" is the dashboard, not the marketing landing page.
+  const publicNavItems = [
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
-    // { path: "/contact", label: "Contact" },
   ];
+
+  const authedNavItems = [
+    { path: "/applicant/dashboard", label: "Dashboard" },
+  ];
+
+  const navItems = isAuthenticated ? authedNavItems : publicNavItems;
 
   const handleAuthAction = () => {
     if (isAuthenticated) {
@@ -32,7 +38,7 @@ const Navbar = () => {
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <Link to={isAuthenticated ? "/applicant/dashboard" : "/"} className="flex items-center">
             <img
               src={logo}
               alt="Company Logo"

@@ -93,12 +93,10 @@ const SignUp = () => {
       const response = await authService.register(registrationData);
 
       if (response.success) {
-        // Immediately authenticate the user so they stay logged in
-        // through the complete-profile step and beyond.
+        // Immediately authenticate the user and land them on the dashboard.
+        // DOB and SSN will be collected during application creation.
         registerAndLogin(response);
-        // Store email so CompleteProfile can send it to the backend
-        localStorage.setItem("pendingUserEmail", formData.email.toLowerCase());
-        navigate("/applicant/complete-profile", { replace: true });
+        navigate("/applicant/dashboard", { replace: true });
       } else {
         setError(response.message || "Registration failed. Please try again.");
       }
