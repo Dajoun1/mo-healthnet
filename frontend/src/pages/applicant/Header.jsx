@@ -16,17 +16,11 @@ export default function Header() {
         eligibility results fast.
       </p>
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center w-full sm:w-auto mb-10">
-        <button
-          onClick={() => navigate("/signup")}
-          className="bg-[#0B64A4] text-white py-2 px-6 sm:px-8 rounded hover:bg-[#005a80] transition-colors duration-200 w-full sm:w-auto"
-        >
-          Sign Up
+        <button className="bg-[#0B64A4] text-white py-2 px-6 sm:px-8 rounded hover:bg-[#005a80] transition-colors duration-200 w-full sm:w-auto">
+          Apply
         </button>
-        <button
-          onClick={() => navigate("/signin")}
-          className="text-stone-900 font-semibold py-2 px-6 sm:px-8 rounded border border-stone-400 hover:border-[#0B64A4] hover:text-[#0B64A4] transition-colors duration-200 w-full sm:w-auto"
-        >
-          Sign In
+        <button onClick={() => navigate("/signin")} className="text-stone-900 font-semibold py-2 px-6 sm:px-8 rounded border border-stone-400 hover:border-[#0B64A4] hover:text-[#0B64A4] transition-colors duration-200 w-full sm:w-auto">
+          Sign in
         </button>
       </div>
       <div className="mt-10 sm:mt-8 md:mt-12 w-full max-w-7xl mx-auto">

@@ -38,10 +38,10 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 50)
     private String lastName;
 
-    @Column(name = "birth_date", nullable = true)
+    @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 
-    @Column(nullable = true, length = 9)
+    @Column(nullable = false, length = 9)
     private String ssn;
 
     @Column(length = 10)
@@ -50,9 +50,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role; // Applicant, Employee, or Admin
-
-    @Column(name = "profile_complete", nullable = false)
-    private Boolean profileComplete = false; // Track if user completed their profile
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

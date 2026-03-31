@@ -1,6 +1,6 @@
 import Contact from "./Contact";
 import Features from "./Features";
-import Header from "./Header";
+import Header from "./Header"
 
 // pages/Home.jsx
 const Home = () => {

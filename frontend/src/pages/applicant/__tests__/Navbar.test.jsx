@@ -1,18 +1,8 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { BrowserRouter, MemoryRouter } from "react-router-dom";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import Navbar from "../Navbar";
-
-let mockIsAuthenticated = false;
-const mockLogout = vi.fn();
-
-vi.mock("../../../context/AuthContext", () => ({
-  useAuth: () => ({
-    isAuthenticated: mockIsAuthenticated,
-    logout: mockLogout,
-  }),
-}));
 
 // Mock heroicons
 vi.mock("@heroicons/react/24/outline", () => ({
@@ -21,11 +11,6 @@ vi.mock("@heroicons/react/24/outline", () => ({
 }));
 
 describe("Navbar Component", () => {
-  const resetAuthState = () => {
-    mockIsAuthenticated = false;
-    mockLogout.mockClear();
-  };
-
   const renderNavbar = () => {
     return render(
       <BrowserRouter>
@@ -35,7 +20,6 @@ describe("Navbar Component", () => {
   };
 
   it("renders the navbar with logo and desktop menu", () => {
-    resetAuthState();
     renderNavbar();
 
     expect(screen.getByTestId("logo")).toBeInTheDocument();
@@ -44,12 +28,11 @@ describe("Navbar Component", () => {
     // Use getAllByText and check first element (desktop version)
     expect(screen.getAllByText("Home")[0]).toBeInTheDocument();
     expect(screen.getAllByText("About")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("Contact")[0]).toBeInTheDocument();
     expect(screen.getAllByText("Sign In")[0]).toBeInTheDocument();
-    expect(screen.queryByText("Sign Up")).not.toBeInTheDocument();
   });
 
   it("mobile menu is hidden by default", () => {
-    resetAuthState();
     renderNavbar();
 
     const mobileMenu = screen.getByTestId("mobile-menu");
@@ -57,7 +40,6 @@ describe("Navbar Component", () => {
   });
 
   it("toggles mobile menu when button is clicked", () => {
-    resetAuthState();
     renderNavbar();
 
     const menuButton = screen.getByTestId("mobile-menu-button");
@@ -78,7 +60,6 @@ describe("Navbar Component", () => {
   });
 
   it("closes mobile menu when a nav link is clicked", () => {
-    resetAuthState();
     renderNavbar();
 
     const menuButton = screen.getByTestId("mobile-menu-button");
@@ -97,27 +78,27 @@ describe("Navbar Component", () => {
   });
 
   it("has correct navigation links", () => {
-    resetAuthState();
     renderNavbar();
 
     const homeLinks = screen.getAllByText("Home");
     const aboutLinks = screen.getAllByText("About");
+    const contactLinks = screen.getAllByText("Contact");
     const signinLinks = screen.getAllByText("Sign In");
 
     // Should have both desktop and mobile links
     expect(homeLinks).toHaveLength(2);
     expect(aboutLinks).toHaveLength(2);
+    expect(contactLinks).toHaveLength(2);
     expect(signinLinks).toHaveLength(2);
-    expect(screen.queryByText("Sign Up")).not.toBeInTheDocument();
 
     // Check hrefs
     expect(homeLinks[0].closest("a")).toHaveAttribute("href", "/");
     expect(aboutLinks[0].closest("a")).toHaveAttribute("href", "/about");
-    expect(signinLinks[0]).toHaveAttribute("href", "/signin");
+    expect(contactLinks[0].closest("a")).toHaveAttribute("href", "/contact");
+    expect(signinLinks[0].closest("a")).toHaveAttribute("href", "/signin");
   });
 
   it("handles active class correctly", () => {
-    resetAuthState();
     // Use MemoryRouter to set initial route
     render(
       <MemoryRouter initialEntries={["/"]}>
@@ -133,16 +114,5 @@ describe("Navbar Component", () => {
     // About link should not have active class
     const aboutLinks = screen.getAllByText("About");
     expect(aboutLinks[0]).toHaveClass("text-gray-700");
-  });
-
-  it("shows logout for authenticated users and handles logout action", () => {
-    mockIsAuthenticated = true;
-    renderNavbar();
-
-    const logoutButtons = screen.getAllByText("Logout");
-    expect(logoutButtons.length).toBeGreaterThan(0);
-
-    fireEvent.click(logoutButtons[0]);
-    expect(mockLogout).toHaveBeenCalledTimes(1);
   });
 });
