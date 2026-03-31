@@ -12,11 +12,12 @@ CREATE TABLE User (
     first_name VARCHAR(50) NOT NULL,
     middle_name VARCHAR(50),
     last_name VARCHAR(50) NOT NULL,
-    birth_date DATE NOT NULL,
-    ssn CHAR(9) NOT NULL,
+    birth_date DATE,
+    ssn CHAR(9),
     phone CHAR(10),
     -- holds all users, defined by role attribute
     role ENUM('Applicant','Employee','Admin') NOT NULL,
+    profile_complete BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_login DATETIME
 );
