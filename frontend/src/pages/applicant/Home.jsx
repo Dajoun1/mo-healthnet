@@ -1,14 +1,9 @@
-import Contact from "./Contact";
-import Features from "./Features";
-import Header from "./Header";
 
-// pages/Home.jsx
+import ActionCards from "./ActionCards";
 const Home = () => {
   return (
-    <div className="container px-4  mx-auto">
-      <Header />
-      <Features />
-      <Contact />
+    <div className="container px-4  mx-auto min-h-screen flex items-center justify-center">
+      <ActionCards />
     </div>
   );
 };

@@ -11,13 +11,12 @@ import CaseworkerLayout from "./layouts/CaseworkerLayout";
 import Home from "./pages/applicant/Home";
 import About from "./pages/applicant/About";
 import Signin from "./components/Signin";
-import SignUp from "./components/SignUp";
-import CompleteProfile from "./components/CompleteProfile";
 import TestConnection from "./pages/applicant/TestConnection";
 
 // Protected Pages
 import ApplicantDashboard from "./pages/applicant/Dashboard";
 import CaseworkerDashboard from "./pages/caseworker/Dashboard";
+import ApplicationForm from "./pages/applicant/application form/ApplicationForm";
 
 function App() {
   return (
@@ -28,16 +27,11 @@ function App() {
           <Route path="/" element={<ApplicantLayout />}>
             <Route index element={<Home />} />
             <Route path="signin" element={<Signin />} />
-            <Route path="signup" element={<SignUp />} />
-            <Route path="complete-profile" element={<CompleteProfile />} />
             <Route path="about" element={<About />} />
             <Route path="test" element={<TestConnection />} />
           </Route>
 
           <Route path="/signin" element={<Signin />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/register" element={<SignUp />} />
-          <Route path="/applicant/complete-profile" element={<CompleteProfile />} />
 
           {/* Protected Applicant Routes */}
           <Route
@@ -49,7 +43,7 @@ function App() {
             }
           >
             <Route path="dashboard" element={<ApplicantDashboard />} />
-            {/* Will add more applicant routes here */}
+            <Route path="application" element={<ApplicationForm />} />
           </Route>
 
           {/* Protected Caseworker Routes */}
@@ -64,7 +58,6 @@ function App() {
             }
           >
             <Route path="dashboard" element={<CaseworkerDashboard />} />
-            {/* Will add more caseworker routes here */}
           </Route>
         </Routes>
       </AuthProvider>

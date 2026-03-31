@@ -80,31 +80,18 @@ export const authService = {
                 user,
             };
         } catch (error) {
-            throw error.response?.data || { message: 'Login failed' };
+            const status = error.response?.status;
+            // Never expose raw backend errors to the UI
+            if (status === 401 || status === 403) {
+                throw { message: 'Invalid email or password. Please try again.' };
+            }
+            throw { message: 'Unable to sign in. Please try again later.' };
         }
     },
 
     logout: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-    },
-
-    register: async (registrationData) => {
-        try {
-            const response = await api.post('/auth/register', registrationData);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || { message: 'Registration failed' };
-        }
-    },
-
-    completeProfile: async (profileData) => {
-        try {
-            const response = await api.post('/auth/complete-profile', profileData);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || { message: 'Profile completion failed' };
-        }
     },
 
     getCurrentUser: () => {
@@ -125,6 +112,73 @@ export const authService = {
         const user = authService.getCurrentUser();
         return user?.role || null;
     }
+};
+
+
+export const applicationService = {
+    /**
+     * Submit application
+     * @param {FormData} formData - The application data including file upload
+     * @returns {Promise} Response from server
+     */
+    submitApplication: async (formData) => {
+        try {
+            // For FormData
+            const response = await api.post('/applications/submit', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    console.log(`Upload progress: ${percentCompleted}%`);
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Application submission failed' };
+        }
+    },
+
+    /**
+     * Get application status by ID
+     * @param {string} applicationId - The application ID
+     * @returns {Promise} Application status
+     */
+    getApplicationStatus: async (applicationId) => {
+        try {
+            const response = await api.get(`/applications/${applicationId}/status`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to fetch application status' };
+        }
+    },
+
+    /**
+     * Get all applications for current user
+     * @returns {Promise} List of user's applications
+     */
+    getUserApplications: async () => {
+        try {
+            const response = await api.get('/applications/my-applications');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to fetch applications' };
+        }
+    },
+
+    /**
+     * Withdraw an application
+     * @param {string} applicationId - The application ID
+     * @returns {Promise} Response
+     */
+    withdrawApplication: async (applicationId) => {
+        try {
+            const response = await api.post(`/applications/${applicationId}/withdraw`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to withdraw application' };
+        }
+    },
 };
 
 export default api;
