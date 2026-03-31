@@ -89,24 +89,6 @@ export const authService = {
         localStorage.removeItem('user');
     },
 
-    register: async (registrationData) => {
-        try {
-            const response = await api.post('/auth/register', registrationData);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || { message: 'Registration failed' };
-        }
-    },
-
-    completeProfile: async (profileData) => {
-        try {
-            const response = await api.post('/auth/complete-profile', profileData);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || { message: 'Profile completion failed' };
-        }
-    },
-
     getCurrentUser: () => {
         try {
             const user = localStorage.getItem('user');
