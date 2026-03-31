@@ -1,8 +1,9 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext } from "react";
 import { authService } from "../services/api";
 
 const AuthContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -12,18 +13,9 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => authService.getCurrentUser() || null);
+  const [loading] = useState(false);
   const [error, setError] = useState(null);
-
-  // Check for existing user on mount
-  useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    if (currentUser) {
-      setUser(currentUser);
-    }
-    setLoading(false);
-  }, []);
 
   const login = async (credentials) => {
     setError(null);
@@ -32,7 +24,7 @@ export const AuthProvider = ({ children }) => {
       setUser(response.user);
       return { success: true, data: response };
     } catch (err) {
-      const errorMessage = err.message || "Login failed";
+      const errorMessage = err.message || "Unable to sign in. Please try again later.";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }

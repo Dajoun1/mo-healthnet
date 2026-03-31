@@ -1,28 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import logo from "../../assets/icons/mohealthnet1.png";
 import { useAuth } from "../../context/AuthContext";
-
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
-
   const toggleMenu = () => setIsOpen((prev) => !prev);
-
-  // Handle scroll effect
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -32,19 +24,12 @@ const Navbar = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // Authenticated users' "Home" is the dashboard, not the marketing landing page.
   const publicNavItems = [
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
   ];
-
-  const authedNavItems = [
-    { path: "/applicant/dashboard", label: "Dashboard" },
-  ];
-
+  const authedNavItems = [{ path: "/applicant/dashboard", label: "Dashboard" }];
   const navItems = isAuthenticated ? authedNavItems : publicNavItems;
-
   const handleAuthAction = () => {
     if (isAuthenticated) {
       logout();
@@ -52,9 +37,6 @@ const Navbar = () => {
       navigate("/signin");
     }
   };
-
-  const navItemsToShow = navItems;
-
   return (
     <nav
       className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
@@ -63,7 +45,6 @@ const Navbar = () => {
     >
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
           <Link
             to="/"
             className="flex items-center space-x-2 transition-transform duration-200 hover:scale-105"
@@ -75,19 +56,16 @@ const Navbar = () => {
               data-testid="logo"
             />
           </Link>
-
-          {/* Desktop Navigation */}
           <div
             className="hidden items-center space-x-1 lg:flex"
             data-testid="desktop-menu"
           >
-            {navItemsToShow.map((item) => (
+            {navItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                  ${
+                  `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     isActive
                       ? "bg-white/20 text-white shadow-sm"
                       : "text-white/90 hover:bg-white/10 hover:text-white"
@@ -114,8 +92,6 @@ const Navbar = () => {
               </Link>
             )}
           </div>
-
-          {/* Mobile menu button */}
           <button
             onClick={toggleMenu}
             className="p-2 text-white rounded-lg lg:hidden hover:bg-white/10 focus:outline-none transition-colors"
@@ -129,13 +105,9 @@ const Navbar = () => {
           </button>
         </div>
       </div>
-
-      {/* Mobile Menu */}
       <div
         className={`lg:hidden transition-all duration-300 ease-in-out ${
-          isOpen
-            ? "max-h-screen opacity-100"
-            : "max-h-0 opacity-0 overflow-hidden"
+          isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"
         }`}
         data-testid="mobile-menu"
       >
@@ -146,8 +118,7 @@ const Navbar = () => {
               to={item.path}
               onClick={toggleMenu}
               className={({ isActive }) =>
-                `block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200
-                ${
+                `block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
                   isActive
                     ? "text-blue-600 bg-blue-50"
                     : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
@@ -179,5 +150,4 @@ const Navbar = () => {
     </nav>
   );
 };
-
 export default Navbar;
