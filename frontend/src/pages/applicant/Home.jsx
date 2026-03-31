@@ -1,7 +1,4 @@
 
-
-// pages/Home.jsx
-import React from "react";
 import ActionCards from "./ActionCards";
 const Home = () => {
   return (

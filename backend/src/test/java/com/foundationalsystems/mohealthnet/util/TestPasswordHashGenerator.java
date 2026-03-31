@@ -18,7 +18,7 @@ public class TestPasswordHashGenerator {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10, secureRandom);
 
         // Generate hashes for test passwords
-        String[] testPasswords = {"applicant123", "admin123", "caseworker123"};
+        String[] testPasswords = {"test123", "test123", "test123"};
 
         System.out.println("===========================================");
         System.out.println("Test Password Hashes (Fixed Seed)");

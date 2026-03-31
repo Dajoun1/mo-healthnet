@@ -11,7 +11,7 @@ const TOTAL_STEPS = 4;
 
 function ApplicationForm() {
   const [step, setStep] = useState(1);
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
