@@ -1,9 +1,7 @@
-// WorkRequirementDashboard.jsx
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const WorkRequirementDashboard = () => {
-  const navigate = useNavigate();
 
 
   return (
@@ -75,12 +73,12 @@ const WorkRequirementDashboard = () => {
                 Upload your employment, education, or community service hours to
                 satisfy the monthly requirement.
               </p>
-              <button
-                onClick={() => navigate("/application")}
-                className="text-blue-600 font-medium cursor-pointer text-sm hover:text-blue-700 inline-flex items-center gap-1"
+              <Link
+                to="/applicant/application"
+                className="text-blue-600 font-medium text-sm hover:text-blue-700 inline-flex items-center gap-1"
               >
                 Start application →
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -110,10 +108,10 @@ const WorkRequirementDashboard = () => {
                 under review using your confirmation number.
               </p>
               <button
-                onClick={() => navigate("/status")}
-                className="text-green-600 cursor-pointer font-medium text-sm hover:text-green-700 inline-flex items-center gap-1"
+                disabled
+                className="text-green-400 font-medium text-sm inline-flex items-center gap-1 cursor-not-allowed"
               >
-                Check status →
+                Coming soon →
               </button>
             </div>
           </div>
@@ -143,12 +141,12 @@ const WorkRequirementDashboard = () => {
                 Access your dashboard to view submission history, resubmission
                 dates.
               </p>
-              <button
-                onClick={() => navigate("/signin")}
-                className="text-purple-600 font-medium cursor-pointer text-sm hover:text-purple-700 inline-flex items-center gap-1"
+              <Link
+                to="/signin"
+                className="text-purple-600 font-medium text-sm hover:text-purple-700 inline-flex items-center gap-1"
               >
                 Sign in →
-              </button>
+              </Link>
             </div>
           </div>
         </div>

@@ -1,34 +1,17 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import {
-  Bars3Icon,
-  XMarkIcon,
-  UserCircleIcon,
-  ChevronDownIcon,
-  HomeIcon,
-  ClipboardDocumentListIcon,
-  DocumentTextIcon,
-  ChartBarIcon,
-  BellIcon,
-  Cog6ToothIcon,
-  ArrowRightOnRectangleIcon,
-  UserIcon,
-  ClockIcon,
-  CheckBadgeIcon,
-} from "@heroicons/react/24/outline";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import logo from "../../assets/icons/mohealthnet1.png";
 import { useAuth } from "../../context/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef(null);
-  const notificationRef = useRef(null);
   const navigate = useNavigate();
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
+
+  const toggleMenu = () => setIsOpen((prev) => !prev);
 
   // Handle scroll effect
   useEffect(() => {
@@ -43,20 +26,14 @@ const Navbar = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setUserDropdownOpen(false);
-      }
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(event.target)
-      ) {
-        setNotificationsOpen(false);
+        // reserved for future dropdown
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-8  // Authenticated users' "Home" is the dashboard, not the marketing landing page.
+  // Authenticated users' "Home" is the dashboard, not the marketing landing page.
   const publicNavItems = [
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
@@ -76,13 +53,7 @@ const Navbar = () => {
     }
   };
 
-  const handleNavigation = (path) => {
-    setIsOpen(false);
-    setUserDropdownOpen(false);
-    navigate(path);
-  };
-
-  const navItemsToShow = isAuthenticated ? authenticatedNavItems : navItems;
+  const navItemsToShow = navItems;
 
   return (
     <nav
@@ -92,7 +63,7 @@ const Navbar = () => {
     >
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo with animation */}
+          {/* Logo */}
           <Link
             to="/"
             className="flex items-center space-x-2 transition-transform duration-200 hover:scale-105"
@@ -123,7 +94,6 @@ const Navbar = () => {
                   }`
                 }
               >
-                <item.icon className="w-4 h-4" />
                 {item.label}
               </NavLink>
             ))}
@@ -160,7 +130,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu with improved design */}
+      {/* Mobile Menu */}
       <div
         className={`lg:hidden transition-all duration-300 ease-in-out ${
           isOpen
