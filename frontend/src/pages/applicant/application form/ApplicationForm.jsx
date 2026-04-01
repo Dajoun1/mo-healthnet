@@ -6,12 +6,10 @@ import Documentation from "./Documentation";
 import Review from "./Review";
 import { applicationApi } from "../../../services/applicationApi";
 import { useAuth } from "../../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 
 const TOTAL_STEPS = 4;
 
 function ApplicationForm() {
-  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const { user } = useAuth();
   const [formData, setFormData] = useState({
@@ -69,7 +67,7 @@ function ApplicationForm() {
         newErrors.lastName = "Last name is required";
       if (!formData.dob) newErrors.dob = "Date of birth is required";
       if (!formData.householdSize || formData.householdSize < 1)
-        newErrors.householdSize = "Valid household size (â‰¥1) required";
+        newErrors.householdSize = "Valid household size (1 or more) required";
       if (!/^\d{4}$/.test(formData.ssnLast4))
         newErrors.ssnLast4 = "Exactly 4 digits required";
       if (!/^\S+@\S+\.\S+$/.test(formData.email))
@@ -151,6 +149,19 @@ function ApplicationForm() {
     if (validateStep(step)) {
       setStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
       setErrors({});
+    } else {
+      // Mark all fields for this step as touched so errors are visible
+      const step1Fields = [
+        "firstName", "lastName", "dob", "householdSize", "ssnLast4",
+        "email", "streetAddress", "city", "state", "zipCode", "isMissouriResident",
+      ];
+      const step2Fields = ["activityType", "organizationName", "hoursPerMonth"];
+      const step3Fields = ["file"];
+      const fieldsToTouch =
+        step === 1 ? step1Fields : step === 2 ? step2Fields : step3Fields;
+      const newTouched = {};
+      fieldsToTouch.forEach((f) => (newTouched[f] = true));
+      setTouched((prev) => ({ ...prev, ...newTouched }));
     }
   };
 
@@ -274,7 +285,7 @@ function ApplicationForm() {
       <div className="max-w-4xl w-full relative z-10">
         {/* Main Form Card */}
         <div className="glass-card rounded-3xl p-8 md:p-10">
-          <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} onHomeClick={() => navigate('/')} />
+          <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
 
           {/* Step Header */}
           <div className="mb-8 text-center">
@@ -286,6 +297,25 @@ function ApplicationForm() {
             </h2>
             <p className="text-gray-500">{stepInfo[step].subtitle}</p>
           </div>
+
+          {/* Validation error summary */}
+          {Object.keys(errors).filter((k) => k !== "hoursPerMonthWarning").length > 0 && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-300 rounded-2xl flex items-start gap-3">
+              <i className="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+              <div>
+                <p className="text-sm font-semibold text-red-700">
+                  Please fix the following before continuing:
+                </p>
+                <ul className="mt-1 list-disc list-inside text-sm text-red-600 space-y-0.5">
+                  {Object.entries(errors)
+                    .filter(([key]) => key !== "hoursPerMonthWarning")
+                    .map(([, msg]) => (
+                      <li key={msg}>{msg}</li>
+                    ))}
+                </ul>
+              </div>
+            </div>
+          )}
 
           {/* Form Content */}
           <div className="mb-10">

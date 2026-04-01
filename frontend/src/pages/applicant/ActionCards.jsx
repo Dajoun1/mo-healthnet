@@ -66,17 +66,17 @@ const WorkRequirementDashboard = () => {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Submit Verification
+                Benefits Application
               </h3>
               <p className="text-gray-600 text-sm mb-4">
-                Upload your employment, education, or community service hours to
-                satisfy the monthly requirement.
+                Apply for Missouri Medicaid coverage. Upload required documents
+                and submit your eligibility information.
               </p>
               <Link
                 to="/applicant/application"
-                className="text-[#0078AE] font-medium text-sm hover:text-blue-700 inline-flex items-center gap-1"
+                className="text-[#0078AE] font-medium text-sm hover:text-[#005f8e] inline-flex items-center gap-1"
               >
-                Start application &rarr;
+                Start Application &rarr;
               </Link>
             </div>
           </div>

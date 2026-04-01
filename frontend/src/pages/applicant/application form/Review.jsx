@@ -6,6 +6,11 @@
   submitLoading,
   getOrganizationLabel,
 }) => {
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const [year, month, day] = dateStr.split("-");
+    return `${month}-${day}-${year}`;
+  };
   const renderReviewSection = (title, icon, items) => (
     <div className="mb-6">
       <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -32,7 +37,7 @@
       label: "Full Name",
       value: `${formData.firstName || ""} ${formData.lastName || ""}`.trim(),
     },
-    { label: "Date of Birth", value: formData.dob || "-" },
+    { label: "Date of Birth", value: formatDate(formData.dob) },
     { label: "Household Size", value: formData.householdSize || "-" },
     {
       label: "SSN (Last 4)",

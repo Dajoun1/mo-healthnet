@@ -12,7 +12,6 @@ import Home from "./pages/applicant/Home";
 import About from "./pages/applicant/About";
 import Signin from "./components/Signin";
 import Signup from "./components/Signup";
-import TestConnection from "./pages/applicant/TestConnection";
 
 // Protected Pages
 import CaseworkerDashboard from "./pages/caseworker/Dashboard";
@@ -30,17 +29,10 @@ function App() {
             <Route path="signin" element={<Signin />} />
             <Route path="signup" element={<Signup />} />
             <Route path="about" element={<About />} />
-            <Route path="test" element={<TestConnection />} />
           </Route>
 
-          <Route path="application" element={<ApplicationForm />} />
           <Route path="/signin" element={<Signin />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/register" element={<SignUp />} />
-          <Route
-            path="/applicant/complete-profile"
-            element={<CompleteProfile />}
-          />
+          <Route path="/signup" element={<Signup />} />
 
           {/* Protected Applicant Routes */}
           <Route
@@ -60,12 +52,7 @@ function App() {
             path="/caseworker"
             element={
               <ProtectedRoute
-                allowedRoles={[
-                  "caseworker",
-                  "Caseworker",
-                  "employee",
-                  "Employee",
-                ]}
+                allowedRoles={["caseworker", "Caseworker", "employee", "Employee"]}
               >
                 <CaseworkerLayout />
               </ProtectedRoute>
