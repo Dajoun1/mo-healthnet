@@ -2,11 +2,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const WorkRequirementDashboard = () => {
-
-
   return (
-    <div className="min-h-screen bg-gray-50 md:py-20 lg:py-20 py-20" >
-
+    <div className="min-h-screen bg-gray-50 md:py-20 lg:py-20 py-20">
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Alert Banner - Different phrasing */}
@@ -74,7 +71,7 @@ const WorkRequirementDashboard = () => {
                 satisfy the monthly requirement.
               </p>
               <Link
-                to="/applicant/application"
+                to="/application"
                 className="text-blue-600 font-medium text-sm hover:text-blue-700 inline-flex items-center gap-1"
               >
                 Start application →

@@ -312,12 +312,6 @@ const Navbar = () => {
                 >
                   Sign In
                 </button>
-                <button
-                  onClick={handleSignUp}
-                  className="px-4 py-2 text-sm font-medium text-[#0078AE] bg-white rounded-lg transition-colors hover:bg-gray-100"
-                >
-                  Sign Up
-                </button>
               </div>
             )}
           </div>
