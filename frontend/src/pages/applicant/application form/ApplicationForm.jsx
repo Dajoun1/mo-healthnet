@@ -6,10 +6,12 @@ import Documentation from "./Documentation";
 import Review from "./Review";
 import { applicationApi } from "../../../services/applicationApi";
 import { useAuth } from "../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const TOTAL_STEPS = 4;
 
 function ApplicationForm() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const { user } = useAuth();
   const [formData, setFormData] = useState({
@@ -272,7 +274,7 @@ function ApplicationForm() {
       <div className="max-w-4xl w-full relative z-10">
         {/* Main Form Card */}
         <div className="glass-card rounded-3xl p-8 md:p-10">
-          <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
+          <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} onHomeClick={() => navigate('/')} />
 
           {/* Step Header */}
           <div className="mb-8 text-center">
