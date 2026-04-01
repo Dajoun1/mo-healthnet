@@ -9,7 +9,6 @@ import CaseworkerLayout from "./layouts/CaseworkerLayout";
 
 // Public Pages
 import Home from "./pages/applicant/Home";
-import About from "./pages/applicant/About";
 import Signin from "./components/Signin";
 import TestConnection from "./pages/applicant/TestConnection";
 
@@ -32,12 +31,6 @@ function App() {
 
           <Route path="application" element={<ApplicationForm />} />
           <Route path="/signin" element={<Signin />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/register" element={<SignUp />} />
-          <Route
-            path="/applicant/complete-profile"
-            element={<CompleteProfile />}
-          />
 
           {/* Protected Applicant Routes */}
           <Route
