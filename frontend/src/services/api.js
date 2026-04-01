@@ -94,6 +94,19 @@ export const authService = {
         localStorage.removeItem('user');
     },
 
+    register: async (userData) => {
+        try {
+            const response = await api.post('/auth/register', userData);
+            return { success: true, data: response.data };
+        } catch (error) {
+            const status = error.response?.status;
+            if (status === 409) {
+                throw { message: 'An account with this email already exists.' };
+            }
+            throw { message: 'Unable to create account. Please try again later.' };
+        }
+    },
+
     getCurrentUser: () => {
         try {
             const user = localStorage.getItem('user');

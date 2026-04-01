@@ -1,10 +1,10 @@
-const ActivityInfo = ({ formData, onChange, onBlur, errors, touched, getOrganizationLabel }) => {
+﻿const ActivityInfo = ({ formData, onChange, onBlur, errors, touched, getOrganizationLabel }) => {
   const inputClass = (fieldName) => `
     w-full px-5 py-3.5 rounded-2xl border-2 bg-white/50 backdrop-blur-sm
     transition-all duration-200
     ${errors[fieldName] && touched[fieldName] 
       ? 'border-red-400 focus:border-red-500 ring-4 ring-red-500/20' 
-      : 'border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20'}
+      : 'border-gray-200 focus:border-[#0078AE] focus:ring-4 focus:ring-[#0078AE]/20'}
     focus:outline-none
   `
   
@@ -18,7 +18,7 @@ const ActivityInfo = ({ formData, onChange, onBlur, errors, touched, getOrganiza
     <div className="space-y-6">
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-3">
-          <i className="fas fa-tasks text-blue-500 mr-2"></i>
+          <i className="fas fa-tasks text-[#0078AE] mr-2"></i>
           Activity Type
           <span className="text-red-500 ml-1">*</span>
         </label>
@@ -54,7 +54,7 @@ const ActivityInfo = ({ formData, onChange, onBlur, errors, touched, getOrganiza
       
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          <i className="fas fa-building text-blue-500 mr-2"></i>
+          <i className="fas fa-building text-[#0078AE] mr-2"></i>
           {getOrganizationLabel()}
           <span className="text-red-500 ml-1">*</span>
         </label>
@@ -74,7 +74,7 @@ const ActivityInfo = ({ formData, onChange, onBlur, errors, touched, getOrganiza
       
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2">
-          <i className="fas fa-clock text-blue-500 mr-2"></i>
+          <i className="fas fa-clock text-[#0078AE] mr-2"></i>
           Hours Per Month
           <span className="text-red-500 ml-1">*</span>
         </label>

@@ -1,4 +1,4 @@
-const Review = ({
+﻿const Review = ({
   formData,
   file,
   onSubmit,
@@ -9,7 +9,7 @@ const Review = ({
   const renderReviewSection = (title, icon, items) => (
     <div className="mb-6">
       <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-        <i className={`fas ${icon} text-blue-500`}></i>
+        <i className={`fas ${icon} text-[#0078AE]`}></i>
         {title}
       </h3>
       <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
@@ -20,50 +20,52 @@ const Review = ({
           >
             <span className="text-gray-600 text-sm">{item.label}</span>
             <span className="font-medium text-gray-800 text-sm">
-              {item.value || "—"}
+              {item.value || "-"}
             </span>
           </div>
         ))}
       </div>
     </div>
   );
-
   const personalItems = [
     {
       label: "Full Name",
       value: `${formData.firstName || ""} ${formData.lastName || ""}`.trim(),
     },
-    { label: "Date of Birth", value: formData.dob || "—" },
-    { label: "Household Size", value: formData.householdSize || "—" },
-    {
-      label: "Missouri Resident",
-      value: formData.isMissouriResident ? "Yes ✓" : "No ✗",
-    },
+    { label: "Date of Birth", value: formData.dob || "-" },
+    { label: "Household Size", value: formData.householdSize || "-" },
     {
       label: "SSN (Last 4)",
-      value: formData.ssnLast4 ? `***-**-${formData.ssnLast4}` : "—",
+      value: formData.ssnLast4 ? `***-**-${formData.ssnLast4}` : "-",
     },
-    { label: "Email", value: formData.email || "—" },
+    { label: "Email", value: formData.email || "-" },
+    { label: "Street Address", value: formData.streetAddress || "-" },
+    {
+      label: "City, State ZIP",
+      value:
+        formData.city && formData.state
+          ? `${formData.city}, ${formData.state.toUpperCase()} ${formData.zipCode || ""}`.trim()
+          : "-",
+    },
+    {
+      label: "Missouri Resident",
+      value: formData.isMissouriResident ? "Confirmed" : "Not confirmed",
+    },
   ];
-
-
-
   const activityItems = [
-    { label: "Activity Type", value: formData.activityType || "—" },
-    { label: getOrganizationLabel(), value: formData.organizationName || "—" },
-    { label: "Hours / Month", value: formData.hoursPerMonth || "—" },
+    { label: "Activity Type", value: formData.activityType || "-" },
+    { label: getOrganizationLabel(), value: formData.organizationName || "-" },
+    { label: "Hours / Month", value: formData.hoursPerMonth || "-" },
     {
       label: "Eligibility Status",
       value:
         formData.hoursPerMonth >= 80
-          ? "✓ Eligible (80+ hours)"
-          : "✗ Below requirement",
+          ? "Eligible (80+ hours)"
+          : "Below requirement",
     },
   ];
-
   const isEligible =
     formData.isMissouriResident && formData.hoursPerMonth >= 80;
-
   return (
     <div className="space-y-6">
       {!isEligible && (
@@ -83,10 +85,8 @@ const Review = ({
           </div>
         </div>
       )}
-
       {renderReviewSection("Personal Information", "fa-user", personalItems)}
       {renderReviewSection("Activity Details", "fa-chart-line", activityItems)}
-
       <div className="bg-gray-50 rounded-2xl p-4">
         <div className="flex justify-between items-center">
           <span className="text-gray-600">Proof Document</span>
@@ -95,7 +95,6 @@ const Review = ({
           </span>
         </div>
       </div>
-
       <div
         className={`rounded-2xl p-4 ${isEligible ? "bg-green-50 border border-green-300" : "bg-yellow-50 border border-yellow-300"}`}
       >
@@ -115,7 +114,6 @@ const Review = ({
           </div>
         </div>
       </div>
-
       <div className="bg-yellow-50 rounded-2xl p-4">
         <div className="flex items-start gap-3">
           <i className="fas fa-exclamation-triangle text-yellow-600 mt-0.5"></i>
@@ -126,7 +124,6 @@ const Review = ({
           </p>
         </div>
       </div>
-
       <div className="flex gap-4 pt-4">
         <button
           onClick={onBack}
@@ -156,5 +153,4 @@ const Review = ({
     </div>
   );
 };
-
 export default Review;

@@ -1,4 +1,4 @@
-const Documentation = ({ file, onFileChange, errors }) => {
+﻿const Documentation = ({ file, onFileChange, errors }) => {
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
@@ -19,7 +19,7 @@ const Documentation = ({ file, onFileChange, errors }) => {
             onChange={onFileChange}
             className="hidden"
           />
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl font-semibold hover:bg-blue-700 transition-all">
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#0078AE] text-white rounded-2xl font-semibold hover:bg-[#005f8e] transition-all">
             <i className="fas fa-folder-open"></i>
             Choose File
           </div>
@@ -52,9 +52,9 @@ const Documentation = ({ file, onFileChange, errors }) => {
         </div>
       </div>
       
-      <div className="bg-blue-50 rounded-2xl p-4">
+      <div className="bg-[#0078AE]/5 rounded-2xl p-4">
         <div className="flex items-start gap-3">
-          <i className="fas fa-shield-alt text-blue-600 mt-0.5"></i>
+          <i className="fas fa-shield-alt text-[#0078AE] mt-0.5"></i>
           <p className="text-sm text-blue-800">
             Your document will be securely stored and only used for verification purposes.
           </p>

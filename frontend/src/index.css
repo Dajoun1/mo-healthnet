@@ -62,11 +62,19 @@
   }
 
   .input-modern:focus {
-    @apply border-blue-500 outline-none ring-4 ring-blue-500/20 bg-white;
+    @apply outline-none;
+    border-color: #0078AE;
+    ring: 4px solid rgba(0, 120, 174, 0.2);
+    @apply bg-white;
   }
 
   .btn-primary {
-    @apply px-8 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200;
+    @apply px-8 py-3.5 rounded-2xl text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200;
+    background-color: #0078AE;
+  }
+
+  .btn-primary:hover {
+    background-color: #005f8e;
   }
 
   .btn-secondary {
@@ -74,7 +82,8 @@
   }
 
   .step-indicator-active {
-    @apply w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-lg;
+    @apply w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg;
+    background-color: #0078AE;
   }
 
   .step-indicator-completed {

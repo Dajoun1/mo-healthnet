@@ -1,8 +1,7 @@
-import React from "react";
+﻿import React from "react";
 import { Link } from "react-router-dom";
 
 const WorkRequirementDashboard = () => {
-
 
   return (
     <div className="min-h-screen bg-gray-50 md:py-20 lg:py-20 py-20" >
@@ -25,7 +24,7 @@ const WorkRequirementDashboard = () => {
             </svg>
             <div>
               <p className="text-amber-800 font-semibold">
-                Work Requirement Update — Effective Immediately
+                Work Requirement Update &mdash; Effective Immediately
               </p>
               <p className="text-amber-700 text-sm mt-1">
                 Members aged <span className="font-bold">19-64</span> must
@@ -39,7 +38,7 @@ const WorkRequirementDashboard = () => {
                   href="#"
                   className="text-amber-800 underline font-medium ml-1"
                 >
-                  View full policy →
+                  View full policy &rarr;
                 </a>
               </p>
             </div>
@@ -53,7 +52,7 @@ const WorkRequirementDashboard = () => {
             <div className="p-6">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
                 <svg
-                  className="w-6 h-6 text-blue-600"
+                  className="w-6 h-6 text-[#0078AE]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -75,9 +74,9 @@ const WorkRequirementDashboard = () => {
               </p>
               <Link
                 to="/applicant/application"
-                className="text-blue-600 font-medium text-sm hover:text-blue-700 inline-flex items-center gap-1"
+                className="text-[#0078AE] font-medium text-sm hover:text-blue-700 inline-flex items-center gap-1"
               >
-                Start application →
+                Start application &rarr;
               </Link>
             </div>
           </div>
@@ -111,44 +110,12 @@ const WorkRequirementDashboard = () => {
                 disabled
                 className="text-green-400 font-medium text-sm inline-flex items-center gap-1 cursor-not-allowed"
               >
-                Coming soon →
+                Coming soon &rarr;
               </button>
             </div>
           </div>
 
-          {/* Card 3: Login */}
-          <div className="group bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-            <div className="p-6">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
-                <svg
-                  className="w-6 h-6 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Member Login
-              </h3>
-              <p className="text-gray-600 text-sm mb-4">
-                Access your dashboard to view submission history, resubmission
-                dates.
-              </p>
-              <Link
-                to="/signin"
-                className="text-purple-600 font-medium text-sm hover:text-purple-700 inline-flex items-center gap-1"
-              >
-                Sign in →
-              </Link>
-            </div>
-          </div>
+          {/* Card 3: Login - only shown to unauthenticated users */}
         </div>
       </div>
     </div>
@@ -156,3 +123,4 @@ const WorkRequirementDashboard = () => {
 };
 
 export default WorkRequirementDashboard;
+

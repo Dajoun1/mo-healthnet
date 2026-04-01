@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -80,7 +80,7 @@ const Signin = () => {
         <form onSubmit={handleSubmit} className="flex flex-col w-full gap-2">
           <input
             data-testid="email-input"
-            className="w-full px-5 py-2 mt-2 text-sm border rounded-md border-slate-300 focus:outline-[#52acd6]"
+            className="w-full px-5 py-2 mt-2 text-sm border rounded-md border-slate-300 focus:outline-[#0078AE]"
             type="email"
             name="email"
             placeholder="name@example.com"
@@ -91,7 +91,7 @@ const Signin = () => {
           />
           <input
             data-testid="password-input"
-            className="w-full px-5 py-2 mt-2 text-sm border rounded-md border-slate-300 focus:outline-[#52acd6]"
+            className="w-full px-5 py-2 mt-2 text-sm border rounded-md border-slate-300 focus:outline-[#0078AE]"
             type="password"
             name="password"
             placeholder="Enter your password"
@@ -110,7 +110,7 @@ const Signin = () => {
           <button
             data-testid="submit-button"
             type="submit"
-            className="w-full px-4 py-2 text-white rounded-md bg-[#0078AE] hover:bg-[#1a89bd] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-2 text-white rounded-md bg-[#0078AE] hover:bg-[#005f8e] disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading}
           >
             {loading ? "Signing In..." : "Sign In"}
@@ -122,3 +122,4 @@ const Signin = () => {
 };
 
 export default Signin;
+

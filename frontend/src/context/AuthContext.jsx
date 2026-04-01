@@ -30,6 +30,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const register = async (userData) => {
+    setError(null);
+    try {
+      // Create the account
+      await authService.register(userData);
+      // Auto-login with the same credentials
+      const response = await authService.login({
+        email: userData.email,
+        password: userData.password,
+      });
+      setUser(response.user);
+      return { success: true, data: response };
+    } catch (err) {
+      const errorMessage = err.message || "Unable to create account. Please try again later.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  };
+
   const logout = () => {
     authService.logout();
     setUser(null);
@@ -40,6 +59,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     login,
+    register,
     logout,
     isAuthenticated: !!user,
   };

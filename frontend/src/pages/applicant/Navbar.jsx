@@ -46,7 +46,7 @@ const Navbar = () => {
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
           <Link
-            to="/"
+            to={isAuthenticated ? "/applicant/dashboard" : "/"}
             className="flex items-center space-x-2 transition-transform duration-200 hover:scale-105"
           >
             <img

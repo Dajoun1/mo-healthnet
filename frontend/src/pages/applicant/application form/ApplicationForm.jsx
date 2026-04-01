@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import ProgressBar from "./ProgressBar";
 import PersonalInfo from "./PersonalInfo";
 import ActivityInfo from "./ActivityInfo";
@@ -13,14 +13,18 @@ function ApplicationForm() {
   const [step, setStep] = useState(1);
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
     dob: "",
     householdSize: "",
     isMissouriResident: false,
     ssnLast4: "",
-    email: "",
+    email: user?.username || user?.email || "",
     phone: "",
+    streetAddress: "",
+    city: "",
+    state: "",
+    zipCode: "",
     activityType: "",
     organizationName: "",
     hoursPerMonth: "",
@@ -32,16 +36,20 @@ function ApplicationForm() {
 
   const resetForm = () => {
     setFormData({
-      firstName: "",
-      lastName: "",
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
       dob: "",
       householdSize: "",
       isMissouriResident: false,
       ssnLast4: "",
-      email: "",
+      email: user?.username || user?.email || "",
       activityType: "",
       organizationName: "",
       hoursPerMonth: "",
+      streetAddress: "",
+      city: "",
+      state: "",
+      zipCode: "",
     });
     setProofFile(null);
     setErrors({});
@@ -59,14 +67,24 @@ function ApplicationForm() {
         newErrors.lastName = "Last name is required";
       if (!formData.dob) newErrors.dob = "Date of birth is required";
       if (!formData.householdSize || formData.householdSize < 1)
-        newErrors.householdSize = "Valid household size (≥1) required";
-      if (!formData.isMissouriResident)
-        newErrors.isMissouriResident =
-          "Only Missouri residents are eligible for this health insurance program";
+        newErrors.householdSize = "Valid household size (â‰¥1) required";
       if (!/^\d{4}$/.test(formData.ssnLast4))
         newErrors.ssnLast4 = "Exactly 4 digits required";
       if (!/^\S+@\S+\.\S+$/.test(formData.email))
         newErrors.email = "Valid email address required";
+      if (!formData.streetAddress?.trim())
+        newErrors.streetAddress = "Street address is required";
+      if (!formData.city?.trim())
+        newErrors.city = "City is required";
+      if (!formData.state?.trim())
+        newErrors.state = "State is required";
+      else if (formData.state.trim().toUpperCase() !== "MO")
+        newErrors.state = "You must be a Missouri resident to apply";
+      if (!/^\d{5}$/.test(formData.zipCode))
+        newErrors.zipCode = "Valid 5-digit ZIP code required";
+      if (!formData.isMissouriResident)
+        newErrors.isMissouriResident =
+          "You must confirm your Missouri residency to continue";
     } else if (stepNumber === 2) {
       if (!formData.activityType)
         newErrors.activityType = "Please select activity type";
@@ -155,7 +173,7 @@ function ApplicationForm() {
   //         Object.fromEntries(payload.entries()),
   //       );
   //       alert(
-  //         "🎉 Application submitted successfully! Our team will review your application.",
+  //         "ðŸŽ‰ Application submitted successfully! Our team will review your application.",
   //       );
   //       resetForm();
   //     } catch (error) {
@@ -209,7 +227,7 @@ function ApplicationForm() {
         localStorage.setItem("lastApplicationId", applicationId);
 
         alert(
-          `🎉 Application submitted successfully!\n\nApplication ID: ${applicationId}\nWe'll review your application and contact you within 48 hours.`,
+          `ðŸŽ‰ Application submitted successfully!\n\nApplication ID: ${applicationId}\nWe'll review your application and contact you within 48 hours.`,
         );
         resetForm();
       } else {
@@ -248,7 +266,7 @@ function ApplicationForm() {
   return (
     <div className="min-h-screen py-12 px-4 flex items-center justify-center relative my-10">
       {/* Decorative elements */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
+      <div className="absolute top-20 left-10 w-72 h-72 bg-[#0078AE]/50/10 rounded-full blur-3xl"></div>
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
 
       <div className="max-w-4xl w-full relative z-10">
@@ -258,7 +276,7 @@ function ApplicationForm() {
 
           {/* Step Header */}
           <div className="mb-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-md  text-blue-500 text-6xl mb-4 ">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-md  text-[#0078AE] text-6xl mb-4 ">
               <i className={`fas ${stepInfo[step].icon}`}></i>
             </div>
             <h2 className="text-3xl font-bold text-gray-800 mb-2">
@@ -343,3 +361,4 @@ function ApplicationForm() {
 }
 
 export default ApplicationForm;
+

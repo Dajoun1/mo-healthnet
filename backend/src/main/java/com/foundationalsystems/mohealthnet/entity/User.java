@@ -38,14 +38,29 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 50)
     private String lastName;
 
-    @Column(name = "birth_date", nullable = false)
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(nullable = false, length = 9)
+    @Column(length = 4)
     private String ssn;
 
     @Column(length = 10)
     private String phone;
+
+    @Column(name = "street_address", length = 100)
+    private String streetAddress;
+
+    @Column(length = 50)
+    private String city;
+
+    @Column(length = 2)
+    private String state;
+
+    @Column(name = "zip_code", length = 5)
+    private String zipCode;
+
+    @Column(name = "profile_complete", nullable = false)
+    private Boolean profileComplete = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
