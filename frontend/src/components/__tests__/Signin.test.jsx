@@ -4,15 +4,13 @@ import userEvent from "@testing-library/user-event";
 import { BrowserRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import Signin from "../Signin";
+import { authService } from "../../services/api";
 
-const mockLogin = vi.fn();
-
-vi.mock("../../context/AuthContext", () => ({
-  useAuth: () => ({
-    login: mockLogin,
-    isAuthenticated: false,
-    user: null,
-  }),
+// Mock the authService
+vi.mock("../../services/api", () => ({
+  authService: {
+    login: vi.fn(),
+  },
 }));
 
 // Mock useNavigate
@@ -41,11 +39,10 @@ describe("Signin Component", () => {
   it("renders the signin form correctly", () => {
     renderSignin();
 
-    expect(screen.getByText("Missouri Medicaid Login")).toBeInTheDocument();
+    expect(screen.getByText("Applicant Login")).toBeInTheDocument();
     expect(screen.getByTestId("email-input")).toBeInTheDocument();
     expect(screen.getByTestId("password-input")).toBeInTheDocument();
     expect(screen.getByTestId("submit-button")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /create an account/i })).toHaveAttribute("href", "/signup");
     expect(screen.getByPlaceholderText("name@example.com")).toBeInTheDocument();
     expect(
       screen.getByPlaceholderText("Enter your password"),
@@ -66,7 +63,7 @@ describe("Signin Component", () => {
   });
 
   it("shows loading state during form submission", async () => {
-    mockLogin.mockImplementation(
+    authService.login.mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 100)),
     );
 
@@ -88,7 +85,11 @@ describe("Signin Component", () => {
   });
 
   it("handles successful login", async () => {
-    mockLogin.mockResolvedValue({ success: true, data: { success: true, role: "Applicant" } });
+    const mockResponse = {
+      token: "fake-token",
+      user: { email: "test@example.com" },
+    };
+    authService.login.mockResolvedValue(mockResponse);
 
     renderSignin();
 
@@ -102,17 +103,17 @@ describe("Signin Component", () => {
     fireEvent.submit(form);
 
     await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalledWith({
+      expect(authService.login).toHaveBeenCalledWith({
         email: "test@example.com",
         password: "password123",
       });
-      expect(mockNavigate).toHaveBeenCalledWith("/applicant/dashboard", { replace: true });
+      expect(mockNavigate).toHaveBeenCalledWith("/");
     });
   });
 
   it("handles login error", async () => {
     const errorMessage = "Invalid credentials";
-    mockLogin.mockRejectedValue({ message: errorMessage });
+    authService.login.mockRejectedValue({ message: errorMessage });
 
     renderSignin();
 
@@ -133,7 +134,7 @@ describe("Signin Component", () => {
   });
 
   it("disables inputs during loading", async () => {
-    mockLogin.mockImplementation(
+    authService.login.mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 100)),
     );
 

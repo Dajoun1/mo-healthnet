@@ -80,31 +80,18 @@ export const authService = {
                 user,
             };
         } catch (error) {
-            throw error.response?.data || { message: 'Login failed' };
+            const status = error.response?.status;
+            // Never expose raw backend errors to the UI
+            if (status === 401 || status === 403) {
+                throw { message: 'Invalid email or password. Please try again.' };
+            }
+            throw { message: 'Unable to sign in. Please try again later.' };
         }
     },
 
     logout: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-    },
-
-    register: async (registrationData) => {
-        try {
-            const response = await api.post('/auth/register', registrationData);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || { message: 'Registration failed' };
-        }
-    },
-
-    completeProfile: async (profileData) => {
-        try {
-            const response = await api.post('/auth/complete-profile', profileData);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || { message: 'Profile completion failed' };
-        }
     },
 
     getCurrentUser: () => {

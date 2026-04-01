@@ -9,9 +9,8 @@ import CaseworkerLayout from "./layouts/CaseworkerLayout";
 
 // Public Pages
 import Home from "./pages/applicant/Home";
+import About from "./pages/applicant/About";
 import Signin from "./components/Signin";
-import SignUp from "./components/SignUp";
-import CompleteProfile from "./components/CompleteProfile";
 import TestConnection from "./pages/applicant/TestConnection";
 
 // Protected Pages
@@ -50,7 +49,7 @@ function App() {
             }
           >
             <Route path="dashboard" element={<ApplicantDashboard />} />
-            {/* Will add more applicant routes here */}
+            <Route path="application" element={<ApplicationForm />} />
           </Route>
 
           {/* Protected Caseworker Routes */}
@@ -70,7 +69,6 @@ function App() {
             }
           >
             <Route path="dashboard" element={<CaseworkerDashboard />} />
-            {/* Will add more caseworker routes here */}
           </Route>
         </Routes>
       </AuthProvider>

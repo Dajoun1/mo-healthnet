@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const normalizeRole = (role) => (role || "").toString().trim().toLowerCase();
@@ -48,31 +48,14 @@ const Signin = () => {
 
     try {
       const result = await login(formData);
-      const backendSuccess = result?.data?.success;
-      const isLoginSuccessful =
-        result?.success === true &&
-        (backendSuccess === undefined || backendSuccess === true);
-
-      if (isLoginSuccessful) {
-        const userRole =
-          result?.data?.user?.role ??
-          result?.data?.role ??
-          result?.data?.userRole ??
-          user?.role;
-
+      if (result?.success) {
+        const userRole = result?.data?.user?.role ?? user?.role;
         navigate(getDashboardRouteForRole(userRole), { replace: true });
       } else {
-        setError(
-          result?.error ||
-            result?.data?.message ||
-            "Login failed. Please check your email and password and try again."
-        );
+        setError(result?.error || "Invalid email or password. Please try again.");
       }
-    } catch (err) {
-      setError(
-        err.message ||
-          "Login failed. Please check your email and password and try again."
-      );
+    } catch {
+      setError("Unable to sign in. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -132,13 +115,6 @@ const Signin = () => {
           >
             {loading ? "Signing In..." : "Sign In"}
           </button>
-
-          <p className="mt-2 text-sm text-center text-gray-600">
-            New here?{" "}
-            <Link to="/signup" className="font-semibold text-[#0078AE] hover:underline">
-              Create an account
-            </Link>
-          </p>
         </form>
       </div>
     </div>
