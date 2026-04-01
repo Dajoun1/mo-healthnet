@@ -28,14 +28,17 @@ function App() {
           <Route path="/" element={<ApplicantLayout />}>
             <Route index element={<Home />} />
             <Route path="signin" element={<Signin />} />
-            <Route path="application" element={<ApplicationForm />} />
             <Route path="test" element={<TestConnection />} />
           </Route>
 
+          <Route path="application" element={<ApplicationForm />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/register" element={<SignUp />} />
-          <Route path="/applicant/complete-profile" element={<CompleteProfile />} />
+          <Route
+            path="/applicant/complete-profile"
+            element={<CompleteProfile />}
+          />
 
           {/* Protected Applicant Routes */}
           <Route
@@ -55,7 +58,12 @@ function App() {
             path="/caseworker"
             element={
               <ProtectedRoute
-                allowedRoles={["caseworker", "Caseworker", "employee", "Employee"]}
+                allowedRoles={[
+                  "caseworker",
+                  "Caseworker",
+                  "employee",
+                  "Employee",
+                ]}
               >
                 <CaseworkerLayout />
               </ProtectedRoute>
