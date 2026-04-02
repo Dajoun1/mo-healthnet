@@ -1,4 +1,4 @@
-﻿const ActivityInfo = ({ formData, onChange, onBlur, errors, touched, getOrganizationLabel }) => {
+﻿﻿const ActivityInfo = ({ formData, onChange, onBlur, errors, touched, getOrganizationLabel }) => {
   const inputClass = (fieldName) => `
     w-full px-5 py-3.5 rounded-2xl border-2 bg-white/50 backdrop-blur-sm
     transition-all duration-200
@@ -53,12 +53,13 @@
       </div>
       
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label htmlFor="organizationName" className="block text-sm font-semibold text-gray-700 mb-2">
           <i className="fas fa-building text-[#0078AE] mr-2"></i>
           {getOrganizationLabel()}
           <span className="text-red-500 ml-1">*</span>
         </label>
         <input
+          id="organizationName"
           type="text"
           name="organizationName"
           value={formData.organizationName || ''}
@@ -73,12 +74,13 @@
       </div>
       
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label htmlFor="hoursPerMonth" className="block text-sm font-semibold text-gray-700 mb-2">
           <i className="fas fa-clock text-[#0078AE] mr-2"></i>
           Hours Per Month
           <span className="text-red-500 ml-1">*</span>
         </label>
         <input
+          id="hoursPerMonth"
           type="number"
           name="hoursPerMonth"
           value={formData.hoursPerMonth || ''}
