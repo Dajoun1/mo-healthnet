@@ -1,16 +1,7 @@
-import Contact from "./Contact";
-import Features from "./Features";
-import Header from "./Header"
+import Header from "./Header";
 
-// pages/Home.jsx
 const Home = () => {
-  return (
-    <div className="container px-4  mx-auto">
-      <Header />
-      <Features />
-      <Contact />
-    </div>
-  );
+  return <Header />;
 };
 
 export default Home;

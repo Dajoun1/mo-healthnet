@@ -113,21 +113,21 @@ public class LoginController {
         if (email == null || email.trim().isEmpty() ||
             password == null || password.isEmpty() ||
             firstName == null || firstName.trim().isEmpty() ||
-            lastName == null || lastName.trim().isEmpty() ||
-            birthDateStr == null || birthDateStr.trim().isEmpty() ||
-            ssn == null || ssn.trim().isEmpty()) {
+            lastName == null || lastName.trim().isEmpty()) {
 
             LOG.warn("Registration attempt with missing required fields");
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "All required fields must be provided: email, password, firstName, lastName, birthDate, ssn");
+            response.put("message", "All required fields must be provided: email, password, firstName, lastName");
             response.put("success", false);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
         try {
-            // Parse birth date
-            LocalDate birthDate = LocalDate.parse(birthDateStr);
-
+            // Parse birth date only if provided
+            LocalDate birthDate = null;
+            if (birthDateStr != null && !birthDateStr.trim().isEmpty()) {
+                birthDate = LocalDate.parse(birthDateStr);
+            }
             // Parse role (default to Applicant)
             User.UserRole role = User.UserRole.Applicant;
             if (roleStr != null && !roleStr.trim().isEmpty()) {

@@ -11,11 +11,12 @@ import CaseworkerLayout from "./layouts/CaseworkerLayout";
 import Home from "./pages/applicant/Home";
 import About from "./pages/applicant/About";
 import Signin from "./components/Signin";
-import TestConnection from "./pages/applicant/TestConnection";
+import Signup from "./components/Signup";
 
 // Protected Pages
-import ApplicantDashboard from "./pages/applicant/Dashboard";
 import CaseworkerDashboard from "./pages/caseworker/Dashboard";
+import ApplicationForm from "./pages/applicant/application form/ApplicationForm";
+import ActionCards from "./pages/applicant/ActionCards";
 
 function App() {
   return (
@@ -26,11 +27,12 @@ function App() {
           <Route path="/" element={<ApplicantLayout />}>
             <Route index element={<Home />} />
             <Route path="signin" element={<Signin />} />
+            <Route path="signup" element={<Signup />} />
             <Route path="about" element={<About />} />
-            <Route path="test" element={<TestConnection />} />
           </Route>
 
           <Route path="/signin" element={<Signin />} />
+          <Route path="/signup" element={<Signup />} />
 
           {/* Protected Applicant Routes */}
           <Route
@@ -41,8 +43,8 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route path="dashboard" element={<ApplicantDashboard />} />
-            {/* Will add more applicant routes here */}
+            <Route path="dashboard" element={<ActionCards />} />
+            <Route path="application" element={<ApplicationForm />} />
           </Route>
 
           {/* Protected Caseworker Routes */}
@@ -57,7 +59,6 @@ function App() {
             }
           >
             <Route path="dashboard" element={<CaseworkerDashboard />} />
-            {/* Will add more caseworker routes here */}
           </Route>
         </Routes>
       </AuthProvider>
