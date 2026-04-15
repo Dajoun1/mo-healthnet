@@ -25,10 +25,11 @@
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">
               First Name <span className="text-red-500">*</span>
             </label>
             <input
+              id="firstName"
               type="text"
               name="firstName"
               value={formData.firstName || ""}
@@ -39,10 +40,11 @@
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-2">
               Last Name <span className="text-red-500">*</span>
             </label>
             <input
+              id="lastName"
               type="text"
               name="lastName"
               value={formData.lastName || ""}
@@ -55,10 +57,11 @@
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 my-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="dob" className="block text-sm font-semibold text-gray-700 mb-2">
               Date of Birth <span className="text-red-500">*</span>
             </label>
             <input
+              id="dob"
               type="date"
               name="dob"
               value={formData.dob || ""}
@@ -72,10 +75,11 @@
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="householdSize" className="block text-sm font-semibold text-gray-700 mb-2">
               Household Size <span className="text-red-500">*</span>
             </label>
             <input
+              id="householdSize"
               type="number"
               name="householdSize"
               value={formData.householdSize || ""}
@@ -93,10 +97,11 @@
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="ssnLast4" className="block text-sm font-semibold text-gray-700 mb-2">
               Last 4 Digits of SSN <span className="text-red-500">*</span>
             </label>
             <input
+              id="ssnLast4"
               type="text"
               name="ssnLast4"
               value={formData.ssnLast4 || ""}
@@ -117,11 +122,12 @@
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
               <i className="fas fa-phone text-[#0078AE] mr-2"></i>
               Phone Number
             </label>
             <input
+              id="phone"
               type="tel"
               name="phone"
               value={formData.phone || ""}
@@ -137,11 +143,12 @@
         </div>
 
         <div className="mt-5">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
             <i className="fas fa-envelope text-[#0078AE] mr-2"></i>
             Email Address <span className="text-red-500">*</span>
           </label>
           <input
+            id="email"
             type="email"
             name="email"
             value={formData.email || ""}
@@ -165,10 +172,11 @@
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label htmlFor="streetAddress" className="block text-sm font-semibold text-gray-700 mb-2">
               Street Address <span className="text-red-500">*</span>
             </label>
             <input
+              id="streetAddress"
               type="text"
               name="streetAddress"
               value={formData.streetAddress || ""}
@@ -184,10 +192,11 @@
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div className="md:col-span-1">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="city" className="block text-sm font-semibold text-gray-700 mb-2">
                 City <span className="text-red-500">*</span>
               </label>
               <input
+                id="city"
                 type="text"
                 name="city"
                 value={formData.city || ""}
@@ -202,10 +211,11 @@
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="state" className="block text-sm font-semibold text-gray-700 mb-2">
                 State <span className="text-red-500">*</span>
               </label>
               <input
+                id="state"
                 type="text"
                 name="state"
                 value={formData.state || ""}
@@ -221,10 +231,11 @@
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="zipCode" className="block text-sm font-semibold text-gray-700 mb-2">
                 ZIP Code <span className="text-red-500">*</span>
               </label>
               <input
+                id="zipCode"
                 type="text"
                 name="zipCode"
                 value={formData.zipCode || ""}

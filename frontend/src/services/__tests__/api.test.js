@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { authService } from '../api';
-import api from '../api';
+import * as apiModule from '../api';
 
 // Mock axios
 vi.mock('axios', () => ({
@@ -31,47 +31,57 @@ describe('authService', () => {
                 },
             };
 
-            // Mock the post request
-            api.post = vi.fn().mockResolvedValue(mockResponse);
+            apiModule.default.post = vi.fn().mockResolvedValue(mockResponse);
 
             const result = await authService.login(mockCredentials);
 
-            expect(api.post).toHaveBeenCalledWith('/auth/login', mockCredentials);
+            expect(apiModule.default.post).toHaveBeenCalledWith('/auth/login', mockCredentials);
             expect(localStorage.getItem('token')).toBe('fake-token');
-            expect(JSON.parse(localStorage.getItem('user'))).toEqual(mockResponse.data.user);
-            expect(result).toEqual(mockResponse.data);
+            // The service normalises the user object (adds role), so use objectContaining
+            expect(JSON.parse(localStorage.getItem('user'))).toMatchObject({
+                id: 1,
+                email: 'test@test.com',
+            });
+            expect(result.user).toMatchObject({ id: 1, email: 'test@test.com' });
         });
 
-        it('throws error when login fails', async () => {
+        it('throws a generic error when login fails with no status', async () => {
             const mockCredentials = { email: 'test@test.com', password: 'wrong' };
-            const mockError = {
-                response: {
-                    data: { message: 'Invalid credentials' },
-                },
-            };
+            // No response.status → falls through to the generic catch branch
+            const mockError = { response: { data: { message: 'Invalid credentials' } } };
 
-            api.post = vi.fn().mockRejectedValue(mockError);
+            apiModule.default.post = vi.fn().mockRejectedValue(mockError);
 
-            await expect(authService.login(mockCredentials)).rejects.toEqual({
-                message: 'Invalid credentials',
+            await expect(authService.login(mockCredentials)).rejects.toMatchObject({
+                message: 'Unable to sign in. Please try again later.',
             });
             expect(localStorage.getItem('token')).toBeNull();
         });
 
-        it('handles network errors', async () => {
+        it('throws a 401 error message when credentials are wrong', async () => {
+            const mockCredentials = { email: 'test@test.com', password: 'wrong' };
+            const mockError = { response: { status: 401, data: {} } };
+
+            apiModule.default.post = vi.fn().mockRejectedValue(mockError);
+
+            await expect(authService.login(mockCredentials)).rejects.toMatchObject({
+                message: 'Invalid email or password. Please try again.',
+            });
+        });
+
+        it('throws a generic error on network failure', async () => {
             const mockCredentials = { email: 'test@test.com', password: 'password' };
 
-            api.post = vi.fn().mockRejectedValue(new Error('Network Error'));
+            apiModule.default.post = vi.fn().mockRejectedValue(new Error('Network Error'));
 
-            await expect(authService.login(mockCredentials)).rejects.toEqual({
-                message: 'Login failed',
+            await expect(authService.login(mockCredentials)).rejects.toMatchObject({
+                message: 'Unable to sign in. Please try again later.',
             });
         });
     });
 
     describe('logout', () => {
         it('removes token and user from localStorage', () => {
-            // Set items first
             localStorage.setItem('token', 'fake-token');
             localStorage.setItem('user', JSON.stringify({ id: 1 }));
 
@@ -93,15 +103,12 @@ describe('authService', () => {
         });
 
         it('returns null when no user in localStorage', () => {
-            const user = authService.getCurrentUser();
-            expect(user).toBeNull();
+            expect(authService.getCurrentUser()).toBeNull();
         });
 
         it('returns null when localStorage has invalid JSON', () => {
             localStorage.setItem('user', 'invalid-json');
-
-            const user = authService.getCurrentUser();
-            expect(user).toBeNull();
+            expect(authService.getCurrentUser()).toBeNull();
         });
     });
 
