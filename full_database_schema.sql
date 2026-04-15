@@ -90,14 +90,21 @@ CREATE TABLE Employment (
     FOREIGN KEY (employer_id) REFERENCES Employer(id)
 );
 
+CREATE TABLE File_Storage (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    file_name VARCHAR(255),
+    data LONGBLOB
+);
+
 CREATE TABLE Attachment (
     id INT AUTO_INCREMENT PRIMARY KEY,
     application_id INT NOT NULL,
-    -- need to discuss storage of attachments
+    file_id INT,
     file_name VARCHAR(100) NOT NULL,
     file_path VARCHAR(500) NOT NULL,
     uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (application_id) REFERENCES Application(id)
+    FOREIGN KEY (application_id) REFERENCES Application(id),
+    FOREIGN KEY (file_id) REFERENCES File_Storage(id)
 );
 
 CREATE TABLE Verification_Action (
@@ -116,6 +123,7 @@ CREATE TABLE Verification_Action (
     FOREIGN KEY (application_id) REFERENCES Application(id),
     FOREIGN KEY (user_id) REFERENCES User(id)
 );
+
 
 -- password for each is "pass123"
 INSERT INTO User VALUES (NULL,'johndoe@example.com', '$2a$10$cvFfC/237EGbt5l0t3oumu3EmxCBPX.pl8D3OveOx707g4kET6DVO', 'John', NULL, 'Doe', '1990-01-01', '123456789', '5551234567', 'Employee', NULL, NULL);
