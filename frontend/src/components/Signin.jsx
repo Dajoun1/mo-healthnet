@@ -2,16 +2,16 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const normalizeRole = (role) => (role || "").toString().trim().toLowerCase();
+const normalizeRole = (role) => (role || "").toString().trim().toUpperCase();
 
 const getDashboardRouteForRole = (role) => {
   const normalizedRole = normalizeRole(role);
 
-  if (normalizedRole === "applicant") return "/applicant/dashboard";
-  if (normalizedRole === "caseworker" || normalizedRole === "employee") {
+  if (normalizedRole === "APPLICANT") return "/applicant/dashboard";
+  if (normalizedRole === "caseworker" || normalizedRole === "EMPLOYEE") {
     return "/caseworker/dashboard";
   }
-  if (normalizedRole === "admin") return "/";
+  if (normalizedRole === "ADMIN") return "/admin/dashboard";
 
   return "/";
 };
@@ -52,7 +52,9 @@ const Signin = () => {
         const userRole = result?.data?.user?.role ?? user?.role;
         navigate(getDashboardRouteForRole(userRole), { replace: true });
       } else {
-        setError(result?.error || "Invalid email or password. Please try again.");
+        setError(
+          result?.error || "Invalid email or password. Please try again.",
+        );
       }
     } catch {
       setError("Unable to sign in. Please try again later.");
@@ -122,4 +124,3 @@ const Signin = () => {
 };
 
 export default Signin;
-

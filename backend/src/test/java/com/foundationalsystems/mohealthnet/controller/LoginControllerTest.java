@@ -34,7 +34,7 @@ class LoginControllerTest {
         mockUser.setUsername("test@example.com");
         mockUser.setFirstName("Test");
         mockUser.setLastName("User");
-        mockUser.setRole(User.UserRole.Applicant);
+        mockUser.setRole(User.UserRole.APPLICANT);
 
         Map<String, String> credentials = Map.of(
                 "email", "test@example.com",

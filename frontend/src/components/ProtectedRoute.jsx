@@ -1,20 +1,22 @@
-﻿import { Navigate } from "react-router-dom";
+﻿﻿import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const normalizeRole = (role) => (role || "").toString().trim().toLowerCase();
+const normalizeRole = (role) => (role || "").toString().trim().toUpperCase();
 
 const roleMatches = (userRole, allowedRoles = []) => {
   const normalizedUserRole = normalizeRole(userRole);
-  const normalizedAllowedRoles = allowedRoles.map((role) => normalizeRole(role));
+  const normalizedAllowedRoles = allowedRoles.map((role) =>
+    normalizeRole(role),
+  );
 
   if (normalizedAllowedRoles.includes(normalizedUserRole)) {
     return true;
   }
 
-  // Treat Employee as Caseworker-equivalent for dashboard access.
+  // Treat EMPLOYEE as caseworker-equivalent for dashboard access
   if (
-    normalizedUserRole === "employee" &&
-    normalizedAllowedRoles.includes("caseworker")
+    normalizedUserRole === "EMPLOYEE" &&
+    normalizedAllowedRoles.includes("CASEWORKER")
   ) {
     return true;
   }
@@ -24,15 +26,19 @@ const roleMatches = (userRole, allowedRoles = []) => {
 
 const getDashboardRouteForRole = (role) => {
   const normalizedRole = normalizeRole(role);
-  if (normalizedRole === "applicant") return "/applicant/dashboard";
-  if (normalizedRole === "caseworker" || normalizedRole === "employee") {
+  if (normalizedRole === "APPLICANT") return "/applicant/dashboard";
+  if (normalizedRole === "EMPLOYEE") {
     return "/caseworker/dashboard";
   }
+  if (normalizedRole === "ADMIN") return "/admin/dashboard";
   return "/";
 };
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { user, isAuthenticated, loading } = useAuth();
+
+  console.log("ProtectedRoute - User:", user); // Debug log
+  console.log("ProtectedRoute - Allowed roles:", allowedRoles);
 
   if (loading) {
     return (
@@ -47,6 +53,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   }
 
   if (allowedRoles.length > 0 && !roleMatches(user?.role, allowedRoles)) {
+    console.log(`Role mismatch. User role: ${user?.role}, Allowed: ${allowedRoles}`);
     return <Navigate to={getDashboardRouteForRole(user?.role)} replace />;
   }
 

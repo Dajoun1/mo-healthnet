@@ -14,11 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * REST controller that handles login and authentication-related HTTP requests for the Employment App.
- * Uses bcrypt for secure password hashing and verification.
- * Portal login uses email + password (no username required).
- */
 @RestController
 @RequestMapping("/auth")
 public class LoginController {
@@ -28,28 +23,17 @@ public class LoginController {
     @Autowired
     protected AuthenticationService authenticationService;
 
-    /**
-     * Test endpoint for checking login endpoint availability.
-     */
     @GetMapping("/login")
     public String login() {
         LOG.info("GET /auth/login endpoint called");
         return "Testing login endpoint! Hello class!";
     }
 
-    /**
-     * Handles POST requests to /auth/login for user authentication.
-     * Portal login uses email and password.
-     *
-     * @param credentials a map containing email and password
-     * @return a response with authentication status and user information (on success)
-     */
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> handleLogin(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String password = credentials.get("password");
 
-        // Validate input
         if (email == null || email.trim().isEmpty() || password == null || password.isEmpty()) {
             LOG.warn("Login attempt with missing credentials");
             Map<String, Object> response = new HashMap<>();
@@ -60,7 +44,6 @@ public class LoginController {
 
         LOG.info("POST /auth/login endpoint called with email: {}", email);
 
-        // Authenticate user with bcrypt password verification
         boolean isAuthenticated = authenticationService.authenticateUser(email, password);
 
         Map<String, Object> response = new HashMap<>();
@@ -76,6 +59,7 @@ public class LoginController {
                 response.put("firstName", user.getFirstName());
                 response.put("lastName", user.getLastName());
                 response.put("role", user.getRole());
+                response.put("status", user.getStatus()); // Include status in response
                 LOG.info("User authenticated successfully: {}", email);
                 return ResponseEntity.ok(response);
             }
@@ -86,34 +70,22 @@ public class LoginController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
-    /**
-     * Handles POST requests to /auth/register for user registration.
-     * Hashes the password using bcrypt before storing in the database.
-     * Email serves as the username for portal login.
-     *
-     * @param userData a map containing registration fields
-     * @return a response with registration status
-     */
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> handleRegister(@RequestBody Map<String, Object> userData) {
-        // Extract and validate required fields
         String email = (String) userData.get("email");
         String password = (String) userData.get("password");
         String firstName = (String) userData.get("firstName");
         String lastName = (String) userData.get("lastName");
-        String birthDateStr = (String) userData.get("birthDate"); // Format: YYYY-MM-DD
+        String birthDateStr = (String) userData.get("birthDate");
         String ssn = (String) userData.get("ssn");
-
-        // Optional fields
         String middleName = (String) userData.get("middleName");
         String phone = (String) userData.get("phone");
         String roleStr = (String) userData.get("role");
 
-        // Validate required fields
         if (email == null || email.trim().isEmpty() ||
-            password == null || password.isEmpty() ||
-            firstName == null || firstName.trim().isEmpty() ||
-            lastName == null || lastName.trim().isEmpty()) {
+                password == null || password.isEmpty() ||
+                firstName == null || firstName.trim().isEmpty() ||
+                lastName == null || lastName.trim().isEmpty()) {
 
             LOG.warn("Registration attempt with missing required fields");
             Map<String, Object> response = new HashMap<>();
@@ -123,13 +95,12 @@ public class LoginController {
         }
 
         try {
-            // Parse birth date only if provided
             LocalDate birthDate = null;
             if (birthDateStr != null && !birthDateStr.trim().isEmpty()) {
                 birthDate = LocalDate.parse(birthDateStr);
             }
-            // Parse role (default to Applicant)
-            User.UserRole role = User.UserRole.Applicant;
+
+            User.UserRole role = User.UserRole.APPLICANT;
             if (roleStr != null && !roleStr.trim().isEmpty()) {
                 try {
                     role = User.UserRole.valueOf(roleStr);
@@ -138,11 +109,9 @@ public class LoginController {
                 }
             }
 
-            // Email serves as username
             User user = authenticationService.registerUser(
-                email, password, firstName, middleName, lastName,
-                birthDate, ssn, phone, role
-            );
+                    email, password, firstName, middleName, lastName,
+                    birthDate, ssn, phone, role);
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "User registered successfully");
@@ -158,12 +127,6 @@ public class LoginController {
             response.put("message", e.getMessage());
             response.put("success", false);
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-        } catch (IllegalStateException e) {
-            LOG.warn("Invalid date format: {}", e.getMessage());
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Birth date must be in YYYY-MM-DD format");
-            response.put("success", false);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
             LOG.error("Unexpected error during registration", e);
             Map<String, Object> response = new HashMap<>();
@@ -173,4 +136,3 @@ public class LoginController {
         }
     }
 }
-

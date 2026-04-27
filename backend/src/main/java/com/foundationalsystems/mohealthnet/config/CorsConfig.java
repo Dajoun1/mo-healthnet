@@ -16,14 +16,12 @@ import java.util.List;
 public class CorsConfig {
 
     private static final List<String> ALLOWED_ORIGINS = Arrays.asList(
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:5174"
-    );
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://localhost:5174");
 
     private static final List<String> ALLOWED_METHODS = Arrays.asList(
-        "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
-    );
+            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS");
 
     @Bean
     public CorsFilter corsFilter() {
@@ -38,18 +36,19 @@ public class CorsConfig {
     }
 
     /**
-     * Security filter chain configuration to allow authentication endpoints without CSRF protection.
+     * Security filter chain configuration to allow authentication endpoints without
+     * CSRF protection.
      * This is necessary for stateless API authentication.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless API
-            .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/auth/login", "/auth/register").permitAll()
-                .anyRequest().permitAll() // Allow all requests for now
-            );
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless API
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/auth/login", "/auth/register").permitAll()
+                        .anyRequest().permitAll() // Allow all requests for now
+                );
 
         return http.build();
     }

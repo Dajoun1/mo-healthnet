@@ -25,11 +25,9 @@ function ApplicationForm() {
     city: "",
     state: "",
     zipCode: "",
-    activityType: "",
-    organizationName: "",
-    hoursPerMonth: "",
+    activities: [], // Changed from single activity to array
   });
-  const [proofFile, setProofFile] = useState(null);
+  const [proofFiles, setProofFiles] = useState([]); // Changed from single file to array
   const [errors, setErrors] = useState({});
   const [submitLoading, setSubmitLoading] = useState(false);
   const [touched, setTouched] = useState({});
@@ -50,8 +48,9 @@ function ApplicationForm() {
       city: "",
       state: "",
       zipCode: "",
+      activities: [],
     });
-    setProofFile(null);
+    setProofFiles([]);
     setErrors({});
     setTouched({});
     setStep(1);
@@ -86,29 +85,29 @@ function ApplicationForm() {
         newErrors.isMissouriResident =
           "You must confirm your Missouri residency to continue";
     } else if (stepNumber === 2) {
-      if (!formData.activityType)
-        newErrors.activityType = "Please select activity type";
-      if (!formData.organizationName?.trim())
-        newErrors.organizationName = `${getOrganizationLabel()} is required`;
-      if (!formData.hoursPerMonth || formData.hoursPerMonth < 1)
-        newErrors.hoursPerMonth = "Hours per month must be at least 1";
-      if (formData.hoursPerMonth && formData.hoursPerMonth < 80)
-        newErrors.hoursPerMonthWarning =
-          "At least 80 hours per month required for eligibility";
+      if (!formData.activities || formData.activities.length === 0) {
+        newErrors.activities = "Please add at least one activity";
+      } else {
+        const totalHours = formData.activities.reduce((sum, activity) => 
+          sum + (parseInt(activity.hoursPerMonth) || 0), 0
+        );
+        if (totalHours < 80) {
+          newErrors.totalHours = "Total hours across all activities must be at least 80 hours per month";
+        }
+      }
     } else if (stepNumber === 3) {
-      if (!proofFile)
-        newErrors.file = "Please upload proof of activity document";
+      if (!proofFiles || proofFiles.length === 0) {
+        newErrors.file = "Please upload at least one proof document";
+      }
     }
 
     setErrors(newErrors);
-    return (
-      Object.keys(newErrors).filter((key) => key !== "hoursPerMonthWarning")
-        .length === 0
-    );
+    return Object.keys(newErrors).length === 0;
   };
 
-  const getOrganizationLabel = () => {
-    switch (formData.activityType) {
+  const getOrganizationLabel = (activityType = null) => {
+    const type = activityType || (formData.activities[formData.activities.length - 1]?.activityType);
+    switch (type) {
       case "Employment":
         return "Employer Name";
       case "Education":
@@ -121,9 +120,8 @@ function ApplicationForm() {
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    const newValue = type === "checkbox" ? checked : value;
-    setFormData((prev) => ({ ...prev, [name]: newValue }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
@@ -131,18 +129,9 @@ function ApplicationForm() {
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        setErrors((prev) => ({ ...prev, file: "File size exceeds 10MB" }));
-        return;
-      }
-      setProofFile(file);
-      if (errors.file) setErrors((prev) => ({ ...prev, file: undefined }));
-    } else {
-      setProofFile(null);
-    }
+  const handleFilesChange = (files) => {
+    setProofFiles(files);
+    if (errors.file) setErrors((prev) => ({ ...prev, file: undefined }));
   };
 
   const nextStep = () => {
@@ -150,12 +139,11 @@ function ApplicationForm() {
       setStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
       setErrors({});
     } else {
-      // Mark all fields for this step as touched so errors are visible
       const step1Fields = [
         "firstName", "lastName", "dob", "householdSize", "ssnLast4",
         "email", "streetAddress", "city", "state", "zipCode", "isMissouriResident",
       ];
-      const step2Fields = ["activityType", "organizationName", "hoursPerMonth"];
+      const step2Fields = ["activities", "totalHours"];
       const step3Fields = ["file"];
       const fieldsToTouch =
         step === 1 ? step1Fields : step === 2 ? step2Fields : step3Fields;
@@ -170,42 +158,8 @@ function ApplicationForm() {
     setErrors({});
   };
 
-  //   const handleSubmit = async () => {
-  //     if (!validateStep(3)) return;
-
-  //     setSubmitLoading(true);
-
-  //     const payload = new FormData();
-  //     Object.keys(formData).forEach((key) => payload.append(key, formData[key]));
-  //     payload.append("proofDocument", proofFile);
-
-  //     try {
-  //       await new Promise((resolve) => setTimeout(resolve, 2000));
-  //       console.log(
-  //         "Application submitted:",
-  //         Object.fromEntries(payload.entries()),
-  //       );
-  //       alert(
-  //         "ðŸŽ‰ Application submitted successfully! Our team will review your application.",
-  //       );
-  //       resetForm();
-  //     } catch (error) {
-  //       console.error(error);
-  //       alert("Submission failed. Please try again.");
-  //     } finally {
-  //       setSubmitLoading(false);
-  //     }
-  //   };
-
   const handleSubmit = async () => {
     if (!validateStep(3)) return;
-
-    // // Check if user is authenticated
-    // if (!isAuthenticated) {
-    //     alert('Please sign in to submit your application.');
-    //     // Redirect to sign in page or show modal
-    //     return;
-    // }
 
     setSubmitLoading(true);
 
@@ -213,14 +167,22 @@ function ApplicationForm() {
 
     // Add form data
     Object.keys(formData).forEach((key) => {
-      if (formData[key] !== undefined && formData[key] !== "") {
+      if (key === 'activities') {
+        payload.append(key, JSON.stringify(formData[key]));
+      } else if (formData[key] !== undefined && formData[key] !== "") {
         payload.append(key, formData[key]);
       }
     });
 
-    // Add file
-    if (proofFile) {
-      payload.append("proofDocument", proofFile);
+    // Add multiple files
+    if (proofFiles && proofFiles.length > 0) {
+      proofFiles.forEach((fileItem, index) => {
+        payload.append(`proofDocuments`, fileItem.file);
+        payload.append(`proofDocument_${index}_name`, fileItem.name);
+        if (fileItem.description) {
+          payload.append(`proofDocument_${index}_description`, fileItem.description);
+        }
+      });
     }
 
     // Add user ID from auth context
@@ -235,12 +197,11 @@ function ApplicationForm() {
       const result = await applicationApi.submitApplication(payload);
 
       if (result.success) {
-        // Store application ID for reference
         const applicationId = result.data.applicationId;
         localStorage.setItem("lastApplicationId", applicationId);
 
         alert(
-          `ðŸŽ‰ Application submitted successfully!\n\nApplication ID: ${applicationId}\nWe'll review your application and contact you within 48 hours.`,
+          `🎉 Application submitted successfully!\n\nApplication ID: ${applicationId}\nDocuments uploaded: ${proofFiles.length}\nActivities: ${formData.activities.length}\n\nWe'll review your application and contact you within 48 hours.`,
         );
         resetForm();
       } else {
@@ -253,43 +214,30 @@ function ApplicationForm() {
       setSubmitLoading(false);
     }
   };
+
   const stepInfo = {
-    1: {
-      title: "Personal Details",
-      subtitle: "",
-      icon: "fa-user-circle",
-    },
-    2: {
-      title: "Activity Information",
-      subtitle: "",
-      icon: "fa-chart-line",
-    },
-    3: {
-      title: "",
-      subtitle: "",
-      icon: "fa-file-alt",
-    },
-    4: {
-      title: "Review & Submit",
-      subtitle: "",
-      icon: "fa-regular fa-calendar-check",
-    },
+    1: { title: "Personal Details", subtitle: "", icon: "fa-user-circle" },
+    2: { title: "Activity Information", subtitle: "Add one or more activities", icon: "fa-chart-line" },
+    3: { title: "Documentation", subtitle: "Upload supporting documents", icon: "fa-file-alt" },
+    4: { title: "Review & Submit", subtitle: "", icon: "fa-regular fa-calendar-check" },
   };
+
+  // Calculate total hours for display
+  const totalHours = formData.activities?.reduce((sum, activity) => 
+    sum + (parseInt(activity.hoursPerMonth) || 0), 0
+  ) || 0;
 
   return (
     <div className="min-h-screen py-12 px-4 flex items-center justify-center relative my-10">
-      {/* Decorative elements */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-[#0078AE]/50/10 rounded-full blur-3xl"></div>
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
 
       <div className="max-w-4xl w-full relative z-10">
-        {/* Main Form Card */}
         <div className="glass-card rounded-3xl p-8 md:p-10">
           <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
 
-          {/* Step Header */}
           <div className="mb-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-md  text-[#0078AE] text-6xl mb-4 ">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-md text-[#0078AE] text-6xl mb-4">
               <i className={`fas ${stepInfo[step].icon}`}></i>
             </div>
             <h2 className="text-3xl font-bold text-gray-800 mb-2">
@@ -298,8 +246,7 @@ function ApplicationForm() {
             <p className="text-gray-500">{stepInfo[step].subtitle}</p>
           </div>
 
-          {/* Validation error summary */}
-          {Object.keys(errors).filter((k) => k !== "hoursPerMonthWarning").length > 0 && (
+          {Object.keys(errors).length > 0 && (
             <div className="mb-6 p-4 bg-red-50 border border-red-300 rounded-2xl flex items-start gap-3">
               <i className="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
               <div>
@@ -307,17 +254,14 @@ function ApplicationForm() {
                   Please fix the following before continuing:
                 </p>
                 <ul className="mt-1 list-disc list-inside text-sm text-red-600 space-y-0.5">
-                  {Object.entries(errors)
-                    .filter(([key]) => key !== "hoursPerMonthWarning")
-                    .map(([, msg]) => (
-                      <li key={msg}>{msg}</li>
-                    ))}
+                  {Object.entries(errors).map(([key, msg]) => (
+                    <li key={key}>{msg}</li>
+                  ))}
                 </ul>
               </div>
             </div>
           )}
 
-          {/* Form Content */}
           <div className="mb-10">
             {step === 1 && (
               <PersonalInfo
@@ -340,24 +284,24 @@ function ApplicationForm() {
             )}
             {step === 3 && (
               <Documentation
-                file={proofFile}
-                onFileChange={handleFileChange}
+                files={proofFiles}
+                onFilesChange={handleFilesChange}
                 errors={errors}
               />
             )}
             {step === 4 && (
               <Review
                 formData={formData}
-                file={proofFile}
+                files={proofFiles}
                 onSubmit={handleSubmit}
                 onBack={prevStep}
                 submitLoading={submitLoading}
                 getOrganizationLabel={getOrganizationLabel}
+                totalHours={totalHours}
               />
             )}
           </div>
 
-          {/* Navigation Buttons */}
           {step !== 4 && (
             <div className="flex gap-4 pt-6 border-t border-gray-200">
               {step > 1 ? (
@@ -382,7 +326,6 @@ function ApplicationForm() {
           )}
         </div>
 
-        {/* Footer */}
         <div className="text-center mt-6 text-white/60 text-sm">
           <i className="fas fa-lock mr-2"></i>
           Your information is encrypted and secure
@@ -393,4 +336,3 @@ function ApplicationForm() {
 }
 
 export default ApplicationForm;
-
