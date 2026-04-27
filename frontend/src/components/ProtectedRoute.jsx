@@ -28,6 +28,7 @@ const getDashboardRouteForRole = (role) => {
   if (normalizedRole === "caseworker" || normalizedRole === "employee") {
     return "/caseworker/dashboard";
   }
+  if (normalizedRole === "admin") return "/admin/dashboard";
   return "/";
 };
 

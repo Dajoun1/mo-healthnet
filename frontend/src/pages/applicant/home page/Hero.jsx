@@ -69,12 +69,12 @@ const Hero = () => {
             mental health services, and more.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-12">
-            <button onClick={() => navigate("/signin")} className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">
+            <button onClick={() => navigate("/signin")} className="bg-[#0078AE] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#005f8a] transition-colors shadow-lg shadow-blue-200">
               Apply for Coverage
             </button>
             <a
               href="https://mydss.mo.gov/mhd"
-              className="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+              className="border-2 border-[#0078AE] text-[#0078AE] px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
             >
               Learn More
             </a>
