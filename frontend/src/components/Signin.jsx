@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+﻿﻿import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -11,7 +11,7 @@ const getDashboardRouteForRole = (role) => {
   if (normalizedRole === "caseworker" || normalizedRole === "employee") {
     return "/caseworker/dashboard";
   }
-  if (normalizedRole === "admin") return "/";
+  if (normalizedRole === "admin") return "/admin/dashboard";
 
   return "/";
 };

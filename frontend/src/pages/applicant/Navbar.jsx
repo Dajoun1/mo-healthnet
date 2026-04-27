@@ -87,6 +87,9 @@ const Navbar = () => {
   const displayName = user?.firstName
     ? `${user.firstName} ${user.lastName || ""}`.trim()
     : "Member";
+
+
+    
   return (
     <nav
       className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
