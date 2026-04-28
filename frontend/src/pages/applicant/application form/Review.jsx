@@ -1,16 +1,10 @@
-﻿const Review = ({
-  formData,
-  file,
-  onSubmit,
-  onBack,
-  submitLoading,
-  getOrganizationLabel,
-}) => {
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "-";
-    const [year, month, day] = dateStr.split("-");
-    return `${month}-${day}-${year}`;
-  };
+﻿const Review = ({ formData, activities, onSubmit, onBack, submitLoading }) => {
+  const totalHours = activities.reduce(
+    (sum, a) => sum + (Number(a.hoursPerMonth) || 0),
+    0
+  );
+  const isEligible = formData.isMissouriResident && totalHours >= 80;
+
   const renderReviewSection = (title, icon, items) => (
     <div className="mb-6">
       <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -32,18 +26,15 @@
       </div>
     </div>
   );
+
   const personalItems = [
     {
       label: "Full Name",
       value: `${formData.firstName || ""} ${formData.lastName || ""}`.trim(),
     },
-    { label: "Date of Birth", value: formatDate(formData.dob) },
     { label: "Household Size", value: formData.householdSize || "-" },
-    {
-      label: "SSN (Last 4)",
-      value: formData.ssnLast4 ? `***-**-${formData.ssnLast4}` : "-",
-    },
     { label: "Email", value: formData.email || "-" },
+    { label: "Phone", value: formData.phone || "-" },
     { label: "Street Address", value: formData.streetAddress || "-" },
     {
       label: "City, State ZIP",
@@ -57,20 +48,7 @@
       value: formData.isMissouriResident ? "Confirmed" : "Not confirmed",
     },
   ];
-  const activityItems = [
-    { label: "Activity Type", value: formData.activityType || "-" },
-    { label: getOrganizationLabel(), value: formData.organizationName || "-" },
-    { label: "Hours / Month", value: formData.hoursPerMonth || "-" },
-    {
-      label: "Eligibility Status",
-      value:
-        formData.hoursPerMonth >= 80
-          ? "Eligible (80+ hours)"
-          : "Below requirement",
-    },
-  ];
-  const isEligible =
-    formData.isMissouriResident && formData.hoursPerMonth >= 80;
+
   return (
     <div className="space-y-6">
       {!isEligible && (
@@ -82,30 +60,77 @@
               <p className="text-red-700 text-sm">
                 {!formData.isMissouriResident &&
                   "You must be a Missouri resident to apply. "}
-                {formData.hoursPerMonth < 80 &&
-                  "You need at least 80 hours per month to be eligible. "}
+                {totalHours < 80 &&
+                  `You need at least 80 combined hours per month (currently ${totalHours}). `}
                 Please review your application before submitting.
               </p>
             </div>
           </div>
         </div>
       )}
+
       {renderReviewSection("Personal Information", "fa-user", personalItems)}
-      {renderReviewSection("Activity Details", "fa-chart-line", activityItems)}
-      <div className="bg-gray-50 rounded-2xl p-4">
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600">Proof Document</span>
-          <span className="font-medium text-gray-800">
-            {file ? file.name : "Not uploaded"}
+
+      {/* Activities */}
+      <div className="mb-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+          <i className="fas fa-chart-line text-[#0078AE]"></i>
+          Activity Details
+        </h3>
+        {activities.map((act, idx) => (
+          <div
+            key={idx}
+            className="bg-gray-50 rounded-2xl p-4 space-y-2 mb-3"
+          >
+            <p className="text-xs font-semibold text-gray-500 uppercase mb-2">
+              Activity #{idx + 1}
+            </p>
+            {[
+              { label: "Activity Type", value: act.activityType },
+              { label: "Organization / Employer", value: act.organizationName },
+              { label: "Hours / Month", value: act.hoursPerMonth },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0"
+              >
+                <span className="text-gray-600 text-sm">{item.label}</span>
+                <span className="font-medium text-gray-800 text-sm">
+                  {item.value || "-"}
+                </span>
+              </div>
+            ))}
+          </div>
+        ))}
+        <div className="flex justify-between items-center px-4 py-3 bg-blue-50 rounded-2xl border border-blue-200">
+          <span className="text-blue-700 font-semibold text-sm">
+            Total Hours / Month
+          </span>
+          <span
+            className={`font-bold text-sm ${
+              totalHours >= 80 ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {totalHours} hrs{" "}
+            {totalHours >= 80 ? "✓ Eligible" : "✗ Below 80"}
           </span>
         </div>
       </div>
+
       <div
-        className={`rounded-2xl p-4 ${isEligible ? "bg-green-50 border border-green-300" : "bg-yellow-50 border border-yellow-300"}`}
+        className={`rounded-2xl p-4 ${
+          isEligible
+            ? "bg-green-50 border border-green-300"
+            : "bg-yellow-50 border border-yellow-300"
+        }`}
       >
         <div className="flex items-start gap-3">
           <i
-            className={`fas ${isEligible ? "fa-check-circle text-green-600" : "fa-info-circle text-yellow-600"} mt-0.5`}
+            className={`fas ${
+              isEligible
+                ? "fa-check-circle text-green-600"
+                : "fa-info-circle text-yellow-600"
+            } mt-0.5`}
           ></i>
           <div>
             <p className="text-sm font-semibold text-gray-800">
@@ -119,6 +144,7 @@
           </div>
         </div>
       </div>
+
       <div className="bg-yellow-50 rounded-2xl p-4">
         <div className="flex items-start gap-3">
           <i className="fas fa-exclamation-triangle text-yellow-600 mt-0.5"></i>
@@ -129,6 +155,7 @@
           </p>
         </div>
       </div>
+
       <div className="flex gap-4 pt-4">
         <button
           onClick={onBack}
