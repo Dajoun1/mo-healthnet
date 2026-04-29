@@ -66,6 +66,10 @@ public class User {
     @Column(nullable = false)
     private UserRole role; // Applicant, Employee, or Admin
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatus status = UserStatus.Active;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -90,6 +94,13 @@ public class User {
      */
     public enum UserRole {
         Applicant, Employee, Admin
+    }
+
+    /**
+     * Enum for user status in the system
+     */
+    public enum UserStatus {
+        Active, Inactive, Pending, Suspended
     }
 }
 
