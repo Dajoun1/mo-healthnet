@@ -13,7 +13,7 @@ CREATE TABLE User (
     middle_name VARCHAR(50),
     last_name VARCHAR(50) NOT NULL,
     birth_date DATE,
-    ssn CHAR(4),
+    ssn CHAR(9),
     phone CHAR(10),
     street_address VARCHAR(100),
     city VARCHAR(50),
@@ -126,8 +126,8 @@ CREATE TABLE Verification_Action (
 
 
 -- password for each is "pass123"
-INSERT INTO User VALUES (NULL,'johndoe@example.com', '$2a$10$cvFfC/237EGbt5l0t3oumu3EmxCBPX.pl8D3OveOx707g4kET6DVO', 'John', NULL, 'Doe', '1990-01-01', '123456789', '5551234567', 'Employee', NULL, NULL);
-INSERT INTO User VALUES (NULL,'janedoe@example.com', '$2a$10$gsVts3fytdh9nHp.nUXfVuiSzkp9x9vOQoqlQ7qZAaVWlwdTIv7oy', 'Jane', NULL, 'Doe', '1992-01-01', '023456789', '5551234521', 'Admin', NULL, NULL);
-INSERT INTO User VALUES (NULL,'Stevendoe@example.com', '$2a$10$TNYeCGntmMr8SJIJsD60DuMSkMnKtE/.8F65pYqIV4OYmD.rgkTsi', 'Steven', NULL, 'Doe', '1991-01-04', '223456789', '5551234543', 'Applicant', NULL, NULL);
+INSERT INTO User VALUES (NULL,'johndoe@example.com', '$2a$10$cvFfC/237EGbt5l0t3oumu3EmxCBPX.pl8D3OveOx707g4kET6DVO', 'John', NULL, 'Doe', '1990-01-01', '123456789', '5551234567', '111 street', 'St. Louis', 'MO', 63000, 'Applicant', False, NULL, NULL);
+INSERT INTO User VALUES (NULL,'janedoe@example.com', '$2a$10$gsVts3fytdh9nHp.nUXfVuiSzkp9x9vOQoqlQ7qZAaVWlwdTIv7oy', 'Jane', NULL, 'Doe', '1992-01-01', '023456789', '5551234521', '111 street', 'St. Louis', 'MO', 63000, 'Admin', False, NULL, NULL);
+INSERT INTO User VALUES (NULL,'Stevendoe@example.com', '$2a$10$TNYeCGntmMr8SJIJsD60DuMSkMnKtE/.8F65pYqIV4OYmD.rgkTsi', 'Steven', NULL, 'Doe', '1991-01-04', '223456789', '5551234543', '111 street', 'St. Louis', 'MO', 63000, 'Employee', False, NULL, NULL);
 
 -- Additional test data to be added
