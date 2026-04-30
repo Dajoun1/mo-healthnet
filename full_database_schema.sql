@@ -66,6 +66,7 @@ CREATE TABLE Application (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     submitted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    household_size INT,
     verification_status ENUM('Pending','Approved','Denied') DEFAULT 'Pending',
     FOREIGN KEY (user_id) REFERENCES  User(id)
 );
@@ -125,9 +126,12 @@ CREATE TABLE Verification_Action (
 );
 
 
--- password for each is "pass123"
-INSERT INTO User VALUES (NULL,'johndoe@example.com', '$2a$10$cvFfC/237EGbt5l0t3oumu3EmxCBPX.pl8D3OveOx707g4kET6DVO', 'John', NULL, 'Doe', '1990-01-01', '123456789', '5551234567', '111 street', 'St. Louis', 'MO', 63000, 'Applicant', False, NULL, NULL);
-INSERT INTO User VALUES (NULL,'janedoe@example.com', '$2a$10$gsVts3fytdh9nHp.nUXfVuiSzkp9x9vOQoqlQ7qZAaVWlwdTIv7oy', 'Jane', NULL, 'Doe', '1992-01-01', '023456789', '5551234521', '111 street', 'St. Louis', 'MO', 63000, 'Admin', False, NULL, NULL);
-INSERT INTO User VALUES (NULL,'Stevendoe@example.com', '$2a$10$TNYeCGntmMr8SJIJsD60DuMSkMnKtE/.8F65pYqIV4OYmD.rgkTsi', 'Steven', NULL, 'Doe', '1991-01-04', '223456789', '5551234543', '111 street', 'St. Louis', 'MO', 63000, 'Employee', False, NULL, NULL);
+INSERT INTO User VALUES (NULL,'johndoe@example.com', '$2a$10$RhAhKs6o4YJ2pYMPtvFzDOwtm.9pkesynV9Bx6KhUH9TIkwB.D/.O', 'John', NULL, 'Doe', '1990-01-01', '123456789', '5551234567', '111 street', 'St. Louis', 'MO', 63000, 'Applicant', False, NULL, NULL);
+-- applicant123
+INSERT INTO User VALUES (NULL,'janedoe@example.com', '$2a$10$Jghmn5yEi0wgjPe2lkGZBeDDHlmz.KJSGjO5fY5yfa4/tdK2bjY5S', 'Jane', NULL, 'Doe', '1992-01-01', '023456789', '5551234521', '111 street', 'St. Louis', 'MO', 63000, 'Admin', False, NULL, NULL);
+-- admin123
+INSERT INTO User VALUES (NULL,'Stevendoe@example.com', '$2a$10$lT83r0FXBIHadIWNCzYgE.b8q3sosWFup2EqQ/Wp0GQ9PfE3jzhEa', 'Steven', NULL, 'Doe', '1991-01-04', '223456789', '5551234543', '111 street', 'St. Louis', 'MO', 63000, 'Employee', False, NULL, NULL);
+-- caseworker123
+SELECT * FROM User;
 
 -- Additional test data to be added
