@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+﻿﻿import { Link } from "react-router-dom";
 
 const ProgressBar = ({ currentStep, totalSteps }) => {
   const progressPercent = (currentStep / totalSteps) * 100;
@@ -23,7 +23,7 @@ const ProgressBar = ({ currentStep, totalSteps }) => {
           const stepLabels = {
             1: "Personal Info",
             2: "Activity",
-            3: "Document",
+            3: "Documents",
             4: "Review",
           };
 
@@ -32,13 +32,12 @@ const ProgressBar = ({ currentStep, totalSteps }) => {
               <div
                 className={`
                   w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300
-                  ${isCompleted ? "bg-green-500 text-white" : ""}
                   ${!isActive && !isCompleted ? "bg-gray-200 text-gray-500" : ""}
                   ${isActive ? "text-white shadow-lg scale-110" : ""}
                 `}
-                style={isActive ? { backgroundColor: "#0078AE" } : {}}
+                style={isActive ? { backgroundColor: "#0078AE" } : isCompleted ? { backgroundColor: "#0078AE" } : {}}
               >
-                {isCompleted ? <i className="fas fa-check text-sm"></i> : stepNum}
+                {isCompleted ? <i className="fas fa-check text-sm text-white"></i> : stepNum}
               </div>
               <div className="text-xs mt-2 text-gray-500 hidden md:block">
                 {stepLabels[stepNum]}
