@@ -1,15 +1,15 @@
-import Contact from "./Contact";
-import Features from "./Features";
-import Header from "./Header"
+import Header from "./Header";
+import Eligibility from "./home page/Eligibility";
+import Hero from "./home page/Hero";
+import MoreInfo from "./home page/MoreInfo";
 
-// pages/Home.jsx
 const Home = () => {
   return (
-    <div className="container px-4  mx-auto">
-      <Header />
-      <Features />
-      <Contact />
-    </div>
+    <>
+      <Hero />
+      <Eligibility />
+      <MoreInfo />
+    </>
   );
 };
 

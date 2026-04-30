@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+﻿import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const normalizeRole = (role) => (role || "").toString().trim().toLowerCase();
@@ -28,6 +28,7 @@ const getDashboardRouteForRole = (role) => {
   if (normalizedRole === "caseworker" || normalizedRole === "employee") {
     return "/caseworker/dashboard";
   }
+  if (normalizedRole === "admin") return "/admin/dashboard";
   return "/";
 };
 
@@ -37,7 +38,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-16 h-16 border-4 border-[#0078AE] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }

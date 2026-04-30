@@ -4,17 +4,20 @@ import userEvent from "@testing-library/user-event";
 import { BrowserRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import Signin from "../Signin";
-import { authService } from "../../services/api";
 
-// Mock the authService
-vi.mock("../../services/api", () => ({
-  authService: {
-    login: vi.fn(),
-  },
+// ─── Mocks ────────────────────────────────────────────────────────────────────
+
+const mockLogin = vi.fn();
+const mockNavigate = vi.fn();
+
+vi.mock("../../context/AuthContext", () => ({
+  useAuth: () => ({
+    login: mockLogin,
+    isAuthenticated: false,
+    user: null,
+  }),
 }));
 
-// Mock useNavigate
-const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
@@ -23,23 +26,24 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 describe("Signin Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  const renderSignin = () => {
-    return render(
+  const renderSignin = () =>
+    render(
       <BrowserRouter>
         <Signin />
       </BrowserRouter>,
     );
-  };
 
   it("renders the signin form correctly", () => {
     renderSignin();
 
-    expect(screen.getByText("Applicant Login")).toBeInTheDocument();
+    expect(screen.getByText("Missouri Medicaid Login")).toBeInTheDocument();
     expect(screen.getByTestId("email-input")).toBeInTheDocument();
     expect(screen.getByTestId("password-input")).toBeInTheDocument();
     expect(screen.getByTestId("submit-button")).toBeInTheDocument();
@@ -63,93 +67,76 @@ describe("Signin Component", () => {
   });
 
   it("shows loading state during form submission", async () => {
-    authService.login.mockImplementation(
+    mockLogin.mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 100)),
     );
 
     renderSignin();
 
-    const emailInput = screen.getByTestId("email-input");
-    const passwordInput = screen.getByTestId("password-input");
-    const submitButton = screen.getByTestId("submit-button");
+    await userEvent.type(screen.getByTestId("email-input"), "test@example.com");
+    await userEvent.type(screen.getByTestId("password-input"), "password123");
 
-    await userEvent.type(emailInput, "test@example.com");
-    await userEvent.type(passwordInput, "password123");
-
-    // Get the form element directly instead of by role
     const form = document.querySelector("form");
     fireEvent.submit(form);
 
-    expect(submitButton).toBeDisabled();
-    expect(submitButton).toHaveTextContent("Signing In...");
+    expect(screen.getByTestId("submit-button")).toBeDisabled();
+    expect(screen.getByTestId("submit-button")).toHaveTextContent("Signing In...");
   });
 
-  it("handles successful login", async () => {
-    const mockResponse = {
-      token: "fake-token",
-      user: { email: "test@example.com" },
-    };
-    authService.login.mockResolvedValue(mockResponse);
+  it("handles successful login and navigates to applicant dashboard", async () => {
+    mockLogin.mockResolvedValue({
+      success: true,
+      data: { user: { role: "Applicant" } },
+    });
 
     renderSignin();
 
-    const emailInput = screen.getByTestId("email-input");
-    const passwordInput = screen.getByTestId("password-input");
+    await userEvent.type(screen.getByTestId("email-input"), "test@example.com");
+    await userEvent.type(screen.getByTestId("password-input"), "password123");
 
-    await userEvent.type(emailInput, "test@example.com");
-    await userEvent.type(passwordInput, "password123");
-
-    const form = document.querySelector("form");
-    fireEvent.submit(form);
+    fireEvent.submit(document.querySelector("form"));
 
     await waitFor(() => {
-      expect(authService.login).toHaveBeenCalledWith({
+      expect(mockLogin).toHaveBeenCalledWith({
         email: "test@example.com",
         password: "password123",
       });
-      expect(mockNavigate).toHaveBeenCalledWith("/");
+      expect(mockNavigate).toHaveBeenCalledWith(
+        "/applicant/dashboard",
+        { replace: true },
+      );
     });
   });
 
   it("handles login error", async () => {
     const errorMessage = "Invalid credentials";
-    authService.login.mockRejectedValue({ message: errorMessage });
+    mockLogin.mockResolvedValue({ success: false, error: errorMessage });
 
     renderSignin();
 
-    const emailInput = screen.getByTestId("email-input");
-    const passwordInput = screen.getByTestId("password-input");
+    await userEvent.type(screen.getByTestId("email-input"), "test@example.com");
+    await userEvent.type(screen.getByTestId("password-input"), "wrongpassword");
 
-    await userEvent.type(emailInput, "test@example.com");
-    await userEvent.type(passwordInput, "wrongpassword");
-
-    const form = document.querySelector("form");
-    fireEvent.submit(form);
+    fireEvent.submit(document.querySelector("form"));
 
     await waitFor(() => {
-      expect(screen.getByTestId("error-message")).toHaveTextContent(
-        errorMessage,
-      );
+      expect(screen.getByTestId("error-message")).toHaveTextContent(errorMessage);
     });
   });
 
   it("disables inputs during loading", async () => {
-    authService.login.mockImplementation(
+    mockLogin.mockImplementation(
       () => new Promise((resolve) => setTimeout(resolve, 100)),
     );
 
     renderSignin();
 
-    const emailInput = screen.getByTestId("email-input");
-    const passwordInput = screen.getByTestId("password-input");
+    await userEvent.type(screen.getByTestId("email-input"), "test@example.com");
+    await userEvent.type(screen.getByTestId("password-input"), "password123");
 
-    await userEvent.type(emailInput, "test@example.com");
-    await userEvent.type(passwordInput, "password123");
+    fireEvent.submit(document.querySelector("form"));
 
-    const form = document.querySelector("form");
-    fireEvent.submit(form);
-
-    expect(emailInput).toBeDisabled();
-    expect(passwordInput).toBeDisabled();
+    expect(screen.getByTestId("email-input")).toBeDisabled();
+    expect(screen.getByTestId("password-input")).toBeDisabled();
   });
 });
