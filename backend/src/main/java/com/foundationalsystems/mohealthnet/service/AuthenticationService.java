@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -43,29 +45,41 @@ public class AuthenticationService {
      * @return the created User entity
      * @throws IllegalArgumentException if email already exists
      */
+    @Transactional
     public User registerUser(String email, String passwordHash, String firstName,
                             String middleName, String lastName, LocalDate birthDate,
-                            String ssn, String phone, User.UserRole role) {
+                            String ssn, String phone, String streetAddress, String city,
+                            String state, String zipCode, User.UserRole role) {
 
         if (userRepository.existsByUsername(email)) {
             throw new IllegalArgumentException("Email already registered: " + email);
         }
 
         User user = new User();
-        // Email is persisted in username for login identity.
         user.setUsername(email);
-        user.setPasswordHash(passwordEncoder.encode(passwordHash)); // Hash password with bcrypt
+        user.setPasswordHash(passwordEncoder.encode(passwordHash));
         user.setFirstName(firstName);
         user.setMiddleName(middleName);
         user.setLastName(lastName);
         user.setBirthDate(birthDate);
-        user.setSsn(ssn);
+        if (ssn != null && !ssn.isEmpty()) {
+            user.setSsnHash(passwordEncoder.encode(ssn));
+        }
         user.setPhone(phone);
-        user.setRole(role != null ? role : User.UserRole.Applicant); // Default to Applicant
+        if (phone != null && !phone.isEmpty()) {
+            String digitsOnly = phone.replaceAll("\\D", "");
+            user.setPhone(digitsOnly.length() > 10 ? digitsOnly.substring(0, 10) : digitsOnly);
+        }
+        user.setStreetAddress(streetAddress);
+        user.setCity(city);
+        user.setState(state != null ? state.toUpperCase().substring(0, Math.min(2, state.length())) : null);
+        user.setZipCode(zipCode != null ? zipCode.replaceAll("\\D", "").substring(0, Math.min(5, zipCode.replaceAll("\\D", "").length())) : null);
+        user.setRole(role != null ? role : User.UserRole.Applicant);
         user.setCreatedAt(LocalDateTime.now());
 
         User savedUser = userRepository.save(user);
-        LOG.info("New user registered successfully: {}", email);
+        LOG.info("User registered: email={}, streetAddress={}, city={}, state={}, zip={}, birthDate={}",
+            email, streetAddress, city, state, zipCode, birthDate);
         return savedUser;
     }
 

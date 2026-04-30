@@ -5,13 +5,12 @@ export const applicationApi = {
     /**
      * Submit application
      */
-    submitApplication: async (formData) => {
+    submitApplication: async (payload) => {
         try {
-            const response = await api.post('/api/example/apply', formData, {
+            const response = await api.post('/api/applications/submit', payload, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    'Content-Type': 'application/json',
                 },
-                timeout: 30000, // 30 seconds timeout for file upload
             });
             return {
                 success: true,

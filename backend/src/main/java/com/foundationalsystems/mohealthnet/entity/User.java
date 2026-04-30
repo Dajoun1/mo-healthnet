@@ -41,8 +41,8 @@ public class User {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(length = 4)
-    private String ssn;
+    @Column(name = "ssn_hash")
+    private String ssnHash;
 
     @Column(length = 10)
     private String phone;

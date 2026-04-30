@@ -59,10 +59,18 @@ export const authService = {
             const response = await api.post('/auth/login', credentials);
 
             const responseUser = response.data.user || {
+                id: response.data.userId,
+                userId: response.data.userId,
                 role: response.data.role,
                 username: response.data.email,
                 firstName: response.data.firstName,
                 lastName: response.data.lastName,
+                phone: response.data.phone || "",
+                streetAddress: response.data.streetAddress || "",
+                city: response.data.city || "",
+                state: response.data.state || "",
+                zipCode: response.data.zipCode || "",
+                birthDate: response.data.birthDate || "",
             };
 
             const user = {
