@@ -1,2 +1,2 @@
-com/foundationalsystems/mohealthnet/config/TestSecurityConfig.class
-com/foundationalsystems/mohealthnet/controller/LoginControllerTest.class
+com\foundationalsystems\mohealthnet\controller\LoginControllerTest.class
+com\foundationalsystems\mohealthnet\config\TestSecurityConfig.class

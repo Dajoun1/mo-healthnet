@@ -1,47 +1,200 @@
-import { useState } from "react";
-import { PencilSquareIcon, TrashIcon, LockOpenIcon, LockClosedIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useState, useEffect } from "react";
+import {
+  PencilSquareIcon,
+  TrashIcon,
+  LockOpenIcon,
+  LockClosedIcon,
+  PlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { adminApi } from "../../services/adminApi";
 
-const ROLES = ["All", "Admin", "Employee", "Applicant"];
-
-const INITIAL_USERS = [
-  { id: 1, firstName: "Alice", lastName: "Johnson", email: "alice@example.com", role: "Admin", locked: false },
-  { id: 2, firstName: "Bob", lastName: "Smith", email: "bob@example.com", role: "Employee", locked: false },
-  { id: 3, firstName: "Carol", lastName: "White", email: "carol@example.com", role: "Applicant", locked: true },
-  { id: 4, firstName: "David", lastName: "Brown", email: "david@example.com", role: "Applicant", locked: false },
-  { id: 5, firstName: "Eva", lastName: "Davis", email: "eva@example.com", role: "Employee", locked: true },
-  { id: 6, firstName: "Frank", lastName: "Miller", email: "frank@example.com", role: "Admin", locked: false },
-];
+const ROLES = ["All", "ADMIN", "EMPLOYEE", "APPLICANT"];
 
 const ROLE_BADGE = {
-  Admin: "bg-purple-100 text-purple-700",
-  Employee: "bg-blue-100 text-blue-700",
-  Applicant: "bg-green-100 text-green-700",
+  ADMIN: "bg-purple-100 text-purple-700",
+  EMPLOYEE: "bg-blue-100 text-blue-700",
+  APPLICANT: "bg-green-100 text-green-700",
 };
 
-const EMPTY_FORM = { firstName: "", lastName: "", email: "", role: "Applicant" };
+const STATUS_BADGE = {
+  ACTIVE: "bg-green-100 text-green-700",
+  LOCKED: "bg-red-100 text-red-700",
+  DISABLED: "bg-gray-100 text-gray-700",
+};
+
+const EMPTY_FORM = {
+  firstName: "",
+  lastName: "",
+  middleName: "",
+  email: "",
+  role: "APPLICANT",
+};
 
 const AdminDashboard = () => {
-  const [users, setUsers] = useState(INITIAL_USERS);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState("All");
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState("add"); // "add" | "edit"
+  const [modalMode, setModalMode] = useState("add");
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [formErrors, setFormErrors] = useState({});
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
+  const [pageSize] = useState(10);
+  const [sortBy] = useState("id");
+  const [sortDir] = useState("asc");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchMode, setSearchMode] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [roleUpdateLoading, setRoleUpdateLoading] = useState(null);
 
-  const filteredUsers =
-    activeFilter === "All"
-      ? users
-      : users.filter((u) => u.role === activeFilter);
+  // Fetch users based on filter, search, and pagination
+  const fetchUsers = async (pageNum = 0, filter = null, resetPage = false) => {
+    setLoading(true);
+    setError(null);
+    try {
+      let response;
+      const currentPage = resetPage ? 0 : pageNum;
+      const currentFilter = filter !== null ? filter : activeFilter;
 
-  // ── Validation ──────────────────────────────────────────────────────────────
+      if (searchMode && searchTerm.trim()) {
+        response = await adminApi.searchUsers(
+          searchTerm,
+          currentPage,
+          pageSize,
+        );
+      } else if (currentFilter !== "All") {
+        // Get users by role with pagination
+        const roleForApi = currentFilter.toUpperCase();
+        response = await adminApi.getUsersByRole(
+          roleForApi,
+          currentPage,
+          pageSize,
+        );
+      } else {
+        response = await adminApi.getAllUsers(
+          currentPage,
+          pageSize,
+          sortBy,
+          sortDir,
+        );
+      }
+
+      setUsers(response.users || []);
+      setTotalPages(response.totalPages || 0);
+      setTotalItems(response.totalItems || 0);
+      setPage(response.currentPage || 0);
+
+      if (resetPage) {
+        setPage(0);
+      }
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setError(err.message || "Failed to fetch users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch statistics
+  const fetchStats = async () => {
+    try {
+      const statsData = await adminApi.getStatistics();
+      setStats(statsData);
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers(0, "All", true);
+    fetchStats();
+  }, []);
+
+  // Handle filter change
+  const handleFilterChange = async (role) => {
+    setActiveFilter(role);
+    setSelectedUsers([]);
+    setSearchMode(false);
+    setSearchTerm("");
+    await fetchUsers(0, role, true);
+  };
+
+  // Handle search
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    const searchValue = searchTerm.trim();
+
+    if (searchValue) {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await adminApi.searchUsers(searchValue, 0, pageSize);
+        setSearchMode(true);
+        setActiveFilter("All");
+        setSelectedUsers([]);
+        setUsers(response.users || []);
+        setTotalPages(response.totalPages || 0);
+        setTotalItems(response.totalItems || 0);
+        setPage(0);
+      } catch (err) {
+        console.error("Error searching users:", err);
+        setError(err.message || "Failed to search users");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      clearSearch();
+    }
+  };
+
+  const clearSearch = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await adminApi.getAllUsers(0, pageSize, sortBy, sortDir);
+      setSearchTerm("");
+      setSearchMode(false);
+      setActiveFilter("All");
+      setSelectedUsers([]);
+      setUsers(response.users || []);
+      setTotalPages(response.totalPages || 0);
+      setTotalItems(response.totalItems || 0);
+      setPage(0);
+      await fetchStats();
+    } catch (err) {
+      console.error("Error in clearSearch:", err);
+      setError(err.message || "Failed to fetch users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getRoleCount = (role) => {
+    if (!stats) return 0;
+    if (role === "All") return stats.totalUsers || 0;
+    if (role === "ADMIN") return stats.adminUsers || 0;
+    if (role === "EMPLOYEE") return stats.employeeUsers || 0;
+    if (role === "APPLICANT") return stats.applicantUsers || 0;
+    return 0;
+  };
+
+  // Validation
   const validate = () => {
     const errors = {};
-    if (!formData.firstName.trim()) errors.firstName = "First name is required.";
-    if (!formData.lastName.trim()) errors.lastName = "Last name is required.";
-    if (!formData.email.trim()) {
+    if (!formData.firstName?.trim())
+      errors.firstName = "First name is required.";
+    if (!formData.lastName?.trim()) errors.lastName = "Last name is required.";
+    if (!formData.email?.trim()) {
       errors.email = "Email is required.";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = "Enter a valid email address.";
@@ -49,7 +202,7 @@ const AdminDashboard = () => {
     return errors;
   };
 
-  // ── Modal helpers ────────────────────────────────────────────────────────────
+  // Modal helpers
   const openAddModal = () => {
     setFormData(EMPTY_FORM);
     setFormErrors({});
@@ -59,7 +212,13 @@ const AdminDashboard = () => {
   };
 
   const openEditModal = (user) => {
-    setFormData({ firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role });
+    setFormData({
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      middleName: user.middleName || "",
+      email: user.username || user.email || "",
+      role: user.role || "APPLICANT",
+    });
     setFormErrors({});
     setModalMode("edit");
     setEditingId(user.id);
@@ -76,62 +235,236 @@ const AdminDashboard = () => {
     setFormErrors((prev) => ({ ...prev, [e.target.name]: undefined }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const errors = validate();
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
     }
 
-    if (modalMode === "add") {
-      const newUser = {
-        id: Date.now(),
-        ...formData,
-        locked: false,
-      };
-      setUsers((prev) => [...prev, newUser]);
-    } else {
-      setUsers((prev) =>
-        prev.map((u) => (u.id === editingId ? { ...u, ...formData } : u))
-      );
+    setLoading(true);
+    try {
+      if (modalMode === "add") {
+        await adminApi.createUser?.(formData);
+      } else {
+        await adminApi.updateUserInfo(editingId, {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          middleName: formData.middleName,
+          email: formData.email,
+        });
+      }
+      closeModal();
+      if (searchMode) {
+        await handleSearch({ preventDefault: () => {} });
+      } else {
+        await fetchUsers(page, activeFilter);
+      }
+      await fetchStats();
+    } catch (err) {
+      setError(err.message || "Failed to save user");
+      console.error("Error saving user:", err);
+    } finally {
+      setLoading(false);
     }
-    closeModal();
   };
 
-  // ── Delete ───────────────────────────────────────────────────────────────────
+  // Delete
   const confirmDelete = (id) => {
     setDeletingId(id);
     setShowDeleteConfirm(true);
   };
 
-  const handleDelete = () => {
-    setUsers((prev) => prev.filter((u) => u.id !== deletingId));
-    setShowDeleteConfirm(false);
-    setDeletingId(null);
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      await adminApi.deleteUser(deletingId);
+      setShowDeleteConfirm(false);
+      setDeletingId(null);
+      if (searchMode) {
+        await handleSearch({ preventDefault: () => {} });
+      } else {
+        await fetchUsers(page, activeFilter);
+      }
+      await fetchStats();
+    } catch (err) {
+      setError(err.message || "Failed to delete user");
+      console.error("Error deleting user:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ── Unlock ───────────────────────────────────────────────────────────────────
-  const handleToggleLock = (id) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, locked: !u.locked } : u))
+  // Toggle lock/unlock account
+  const handleToggleLock = async (userId, currentStatus) => {
+    setLoading(true);
+    try {
+      const newStatus = currentStatus === "LOCKED" ? "ACTIVE" : "LOCKED";
+      await adminApi.updateUserStatus(userId, newStatus);
+      if (searchMode) {
+        await handleSearch({ preventDefault: () => {} });
+      } else {
+        await fetchUsers(page, activeFilter);
+      }
+      await fetchStats();
+    } catch (err) {
+      setError(err.message || "Failed to update user status");
+      console.error("Error updating status:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update role
+  const handleRoleChange = async (userId, newRole) => {
+    setRoleUpdateLoading(userId);
+    try {
+      await adminApi.updateUserRole(userId, newRole);
+      if (searchMode) {
+        await handleSearch({ preventDefault: () => {} });
+      } else {
+        await fetchUsers(page, activeFilter);
+      }
+      await fetchStats();
+    } catch (err) {
+      setError(err.message || "Failed to update user role");
+      console.error("Error updating role:", err);
+    } finally {
+      setRoleUpdateLoading(null);
+    }
+  };
+
+  // Bulk status update
+  const handleBulkStatusUpdate = async (status) => {
+    if (selectedUsers.length === 0) return;
+    setLoading(true);
+    try {
+      await adminApi.bulkUpdateStatus(selectedUsers, status);
+      setSelectedUsers([]);
+      if (searchMode) {
+        await handleSearch({ preventDefault: () => {} });
+      } else {
+        await fetchUsers(page, activeFilter);
+      }
+      await fetchStats();
+    } catch (err) {
+      setError(err.message || "Failed to update users");
+      console.error("Error in bulk update:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Pagination
+  const handlePreviousPage = () => {
+    if (page > 0) fetchUsers(page - 1, activeFilter);
+  };
+
+  const handleNextPage = () => {
+    if (page < totalPages - 1) fetchUsers(page + 1, activeFilter);
+  };
+
+  // Toggle user selection for bulk actions
+  const toggleUserSelection = (userId) => {
+    setSelectedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
     );
   };
 
+  const toggleSelectAll = () => {
+    if (selectedUsers.length === users.length) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(users.map((u) => u.id));
+    }
+  };
+
+  if (loading && users.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="w-16 h-16 border-4 border-[#0078AE] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="container px-4 mx-auto py-8 my-10 max-w-6xl">
+    <div className="container px-4 mx-auto py-8 my-10 max-w-7xl">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">User Management</h1>
-          <p className="text-gray-500 mt-1">Manage all system users and their account status.</p>
+          <p className="text-gray-500 mt-1">
+            Manage all system users and their account status.
+          </p>
         </div>
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 bg-[#0078AE] hover:bg-[#005f8a] text-white px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          <PlusIcon className="w-5 h-5" />
-          Add User
-        </button>
+        <div className="flex gap-3">
+          {selectedUsers.length > 0 && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleBulkStatusUpdate("ACTIVE")}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                <LockOpenIcon className="w-4 h-4" />
+                Unlock ({selectedUsers.length})
+              </button>
+              <button
+                onClick={() => handleBulkStatusUpdate("LOCKED")}
+                className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                <LockClosedIcon className="w-4 h-4" />
+                Lock ({selectedUsers.length})
+              </button>
+            </div>
+          )}
+          <button
+            onClick={openAddModal}
+            className="flex items-center gap-2 bg-[#0078AE] hover:bg-[#005f8a] text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            <PlusIcon className="w-5 h-5" />
+            Add User
+          </button>
+        </div>
+      </div>
+
+      {/* Error alert */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          {error}
+          <button
+            onClick={() => setError(null)}
+            className="ml-4 text-sm underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Search Bar */}
+      <div className="mb-6">
+        <form onSubmit={handleSearch} className="flex gap-2">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by name or email..."
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0078AE]"
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 bg-[#0078AE] text-white rounded-lg hover:bg-[#005f8a] transition-colors"
+          >
+            Search
+          </button>
+          <button
+            type="button"
+            onClick={clearSearch}
+            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+          >
+            Clear
+          </button>
+        </form>
       </div>
 
       {/* Filter Tabs */}
@@ -139,16 +472,19 @@ const AdminDashboard = () => {
         {ROLES.map((role) => (
           <button
             key={role}
-            onClick={() => setActiveFilter(role)}
+            onClick={() => handleFilterChange(role)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors
-              ${activeFilter === role
-                ? "bg-[#0078AE] text-white border-[#0078AE]"
-                : "bg-white text-gray-600 border-gray-300 hover:border-[#0078AE] hover:text-[#0078AE]"
+              ${
+                activeFilter === role
+                  ? "bg-[#0078AE] text-white border-[#0078AE]"
+                  : "bg-white text-gray-600 border-gray-300 hover:border-[#0078AE] hover:text-[#0078AE]"
               }`}
           >
-            {role}
+            {role === "All"
+              ? "All Users"
+              : role.charAt(0) + role.slice(1).toLowerCase() + "s"}
             <span className="ml-2 text-xs font-semibold">
-              ({role === "All" ? users.length : users.filter((u) => u.role === role).length})
+              ({getRoleCount(role)})
             </span>
           </button>
         ))}
@@ -160,6 +496,16 @@ const AdminDashboard = () => {
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
               <tr>
+                <th className="px-6 py-3">
+                  <input
+                    type="checkbox"
+                    checked={
+                      selectedUsers.length === users.length && users.length > 0
+                    }
+                    onChange={toggleSelectAll}
+                    className="rounded border-gray-300"
+                  />
+                </th>
                 <th className="px-6 py-3">Name</th>
                 <th className="px-6 py-3">Email</th>
                 <th className="px-6 py-3">Role</th>
@@ -168,49 +514,84 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredUsers.length === 0 ? (
+              {users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-gray-400">
+                  <td
+                    colSpan={6}
+                    className="px-6 py-10 text-center text-gray-400"
+                  >
                     No users found.
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                users.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.includes(user.id)}
+                        onChange={() => toggleUserSelection(user.id)}
+                        className="rounded border-gray-300"
+                      />
+                    </td>
                     <td className="px-6 py-4 font-medium text-gray-800">
                       {user.firstName} {user.lastName}
+                      {user.middleName && ` ${user.middleName}`}
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{user.email}</td>
+                    <td className="px-6 py-4 text-gray-600">{user.username}</td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${ROLE_BADGE[user.role]}`}
+                      <select
+                        value={user.role}
+                        onChange={(e) =>
+                          handleRoleChange(user.id, e.target.value)
+                        }
+                        disabled={roleUpdateLoading === user.id}
+                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border-0 focus:ring-2 focus:ring-[#0078AE] ${
+                          ROLE_BADGE[user.role] || ROLE_BADGE.APPLICANT
+                        }`}
                       >
-                        {user.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {user.locked ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-600 bg-red-50 px-2.5 py-0.5 rounded-full">
-                          🔒 Locked
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full">
-                          ✓ Active
+                        <option value="ADMIN">Admin</option>
+                        <option value="EMPLOYEE">Employee</option>
+                        <option value="APPLICANT">Applicant</option>
+                      </select>
+                      {roleUpdateLoading === user.id && (
+                        <span className="ml-2 text-xs text-gray-400">
+                          Updating...
                         </span>
                       )}
                     </td>
                     <td className="px-6 py-4">
+                      <span
+                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                          STATUS_BADGE[user.status] || STATUS_BADGE.ACTIVE
+                        }`}
+                      >
+                        {user.status === "ACTIVE"
+                          ? "✓ Active"
+                          : user.status === "LOCKED"
+                            ? "🔒 Locked"
+                            : "⊘ Disabled"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => handleToggleLock(user.id)}
-                          title={user.locked ? "Unlock account" : "Lock account"}
+                          onClick={() => handleToggleLock(user.id, user.status)}
+                          title={
+                            user.status === "LOCKED"
+                              ? "Unlock account"
+                              : "Lock account"
+                          }
                           className={`p-1.5 rounded-md transition-colors ${
-                            user.locked
+                            user.status === "LOCKED"
                               ? "text-amber-600 hover:bg-amber-50"
                               : "text-gray-400 hover:bg-gray-100 hover:text-amber-600"
                           }`}
                         >
-                          {user.locked ? (
+                          {user.status === "LOCKED" ? (
                             <LockOpenIcon className="w-4 h-4" />
                           ) : (
                             <LockClosedIcon className="w-4 h-4" />
@@ -239,16 +620,68 @@ const AdminDashboard = () => {
           </table>
         </div>
 
-        {/* Table footer */}
-        <div className="px-6 py-3 bg-gray-50 border-t border-gray-100 text-xs text-gray-400">
-          Showing {filteredUsers.length} of {users.length} user{users.length !== 1 ? "s" : ""}
+        {/* Table footer with pagination */}
+        <div className="px-6 py-3 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
+          <div className="text-xs text-gray-400">
+            Showing {users.length} of {totalItems} user
+            {totalItems !== 1 ? "s" : ""}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handlePreviousPage}
+              disabled={page === 0}
+              className="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+            >
+              Previous
+            </button>
+            <span className="px-3 py-1 text-sm">
+              Page {page + 1} of {totalPages}
+            </span>
+            <button
+              onClick={handleNextPage}
+              disabled={page >= totalPages - 1}
+              className="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ── Add / Edit Modal ───────────────────────────────────────────────────── */}
+      {/* Statistics Cards */}
+      {stats && (
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="text-sm text-gray-500">Total Users</div>
+            <div className="text-2xl font-bold text-gray-800">
+              {stats.totalUsers}
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="text-sm text-gray-500">Active Users</div>
+            <div className="text-2xl font-bold text-green-600">
+              {stats.activeUsers}
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="text-sm text-gray-500">Locked Users</div>
+            <div className="text-2xl font-bold text-red-600">
+              {stats.lockedUsers}
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="text-sm text-gray-500">Disabled Users</div>
+            <div className="text-2xl font-bold text-gray-600">
+              {stats.disabledUsers}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div data-testid="user-modal" className="bg-white w-full max-w-md rounded-xl shadow-2xl p-6 relative">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-2xl p-6 relative">
             <button
               onClick={closeModal}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
@@ -261,7 +694,6 @@ const AdminDashboard = () => {
             </h2>
 
             <div className="space-y-4">
-              {/* First Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   First Name <span className="text-red-500">*</span>
@@ -273,14 +705,14 @@ const AdminDashboard = () => {
                   onChange={handleFormChange}
                   className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0078AE]
                     ${formErrors.firstName ? "border-red-400" : "border-gray-300"}`}
-                  placeholder="Jane"
                 />
                 {formErrors.firstName && (
-                  <p className="text-red-500 text-xs mt-1">{formErrors.firstName}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {formErrors.firstName}
+                  </p>
                 )}
               </div>
 
-              {/* Last Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Last Name <span className="text-red-500">*</span>
@@ -292,14 +724,27 @@ const AdminDashboard = () => {
                   onChange={handleFormChange}
                   className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0078AE]
                     ${formErrors.lastName ? "border-red-400" : "border-gray-300"}`}
-                  placeholder="Doe"
                 />
                 {formErrors.lastName && (
-                  <p className="text-red-500 text-xs mt-1">{formErrors.lastName}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {formErrors.lastName}
+                  </p>
                 )}
               </div>
 
-              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Middle Name
+                </label>
+                <input
+                  type="text"
+                  name="middleName"
+                  value={formData.middleName}
+                  onChange={handleFormChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0078AE]"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email <span className="text-red-500">*</span>
@@ -311,27 +756,31 @@ const AdminDashboard = () => {
                   onChange={handleFormChange}
                   className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0078AE]
                     ${formErrors.email ? "border-red-400" : "border-gray-300"}`}
-                  placeholder="jane.doe@example.com"
                 />
                 {formErrors.email && (
-                  <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {formErrors.email}
+                  </p>
                 )}
               </div>
 
-              {/* Role */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleFormChange}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0078AE]"
-                >
-                  <option value="Admin">Admin</option>
-                  <option value="Employee">Employee</option>
-                  <option value="Applicant">Applicant</option>
-                </select>
-              </div>
+              {modalMode === "add" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Role
+                  </label>
+                  <select
+                    name="role"
+                    value={formData.role}
+                    onChange={handleFormChange}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0078AE]"
+                  >
+                    <option value="ADMIN">Admin</option>
+                    <option value="EMPLOYEE">Employee</option>
+                    <option value="APPLICANT">Applicant</option>
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
@@ -343,22 +792,30 @@ const AdminDashboard = () => {
               </button>
               <button
                 onClick={handleSave}
-                className="px-4 py-2 text-sm rounded-lg bg-[#0078AE] hover:bg-[#005f8a] text-white font-medium transition-colors"
+                disabled={loading}
+                className="px-4 py-2 text-sm rounded-lg bg-[#0078AE] hover:bg-[#005f8a] text-white font-medium transition-colors disabled:opacity-50"
               >
-                {modalMode === "add" ? "Add User" : "Save Changes"}
+                {loading
+                  ? "Saving..."
+                  : modalMode === "add"
+                    ? "Add User"
+                    : "Save Changes"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Delete Confirmation Modal ──────────────────────────────────────────── */}
+      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-2">Delete User</h2>
+            <h2 className="text-lg font-bold text-gray-800 mb-2">
+              Delete User
+            </h2>
             <p className="text-sm text-gray-500 mb-6">
-              Are you sure you want to delete this user? This action cannot be undone.
+              Are you sure you want to delete this user? This action cannot be
+              undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
@@ -369,9 +826,10 @@ const AdminDashboard = () => {
               </button>
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 text-sm rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-colors"
+                disabled={loading}
+                className="px-4 py-2 text-sm rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-colors disabled:opacity-50"
               >
-                Delete
+                {loading ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>
@@ -382,5 +840,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
-

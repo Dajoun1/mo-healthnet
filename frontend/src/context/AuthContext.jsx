@@ -1,3 +1,4 @@
+// AuthContext.jsx - Add debug logging
 import React, { createContext, useState, useContext } from "react";
 import { authService } from "../services/api";
 
@@ -13,29 +14,37 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => authService.getCurrentUser() || null);
-  const [loading] = useState(false);
+  const [user, setUser] = useState(() => {
+    const storedUser = authService.getCurrentUser();
+    console.log("Stored user from localStorage:", storedUser);
+    return storedUser || null;
+  });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const login = async (credentials) => {
     setError(null);
+    setLoading(true);
     try {
       const response = await authService.login(credentials);
+      console.log("Login response:", response);
       setUser(response.user);
       return { success: true, data: response };
     } catch (err) {
-      const errorMessage = err.message || "Unable to sign in. Please try again later.";
+      const errorMessage =
+        err.message || "Unable to sign in. Please try again later.";
       setError(errorMessage);
       return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
     }
   };
 
   const register = async (userData) => {
     setError(null);
+    setLoading(true);
     try {
-      // Create the account
       await authService.register(userData);
-      // Auto-login with the same credentials
       const response = await authService.login({
         email: userData.email,
         password: userData.password,
@@ -43,9 +52,12 @@ export const AuthProvider = ({ children }) => {
       setUser(response.user);
       return { success: true, data: response };
     } catch (err) {
-      const errorMessage = err.message || "Unable to create account. Please try again later.";
+      const errorMessage =
+        err.message || "Unable to create account. Please try again later.";
       setError(errorMessage);
       return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
     }
   };
 
