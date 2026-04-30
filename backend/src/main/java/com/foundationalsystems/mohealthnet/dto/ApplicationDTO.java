@@ -28,6 +28,10 @@ public class ApplicationDTO {
     private String reviewNotes;
     private List<ActivityDTO> activities;
 
+    public void setActivityType(String applicationSubmitted) {
+    }
+
+
     public static class ActivityDTO {
         private Integer id;
         private String activityType;
@@ -101,6 +105,70 @@ public class ApplicationDTO {
 
     public void setApplicantFullName(String applicantFullName) {
         this.applicantFullName = applicantFullName;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public void setHouseholdSize(Integer householdSize) {
+        this.householdSize = householdSize;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setStreetAddress(String streetAddress) {
+        this.streetAddress = streetAddress;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
+
+    public void setMissouriResident(Boolean missouriResident) {
+        isMissouriResident = missouriResident;
+    }
+
+    public void setTotalHoursPerMonth(Integer totalHoursPerMonth) {
+        this.totalHoursPerMonth = totalHoursPerMonth;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setSubmittedAt(LocalDateTime submittedAt) {
+        this.submittedAt = submittedAt;
+    }
+
+    public void setReviewedBy(Integer reviewedBy) {
+        this.reviewedBy = reviewedBy;
+    }
+
+    public void setReviewedAt(LocalDateTime reviewedAt) {
+        this.reviewedAt = reviewedAt;
+    }
+
+    public void setReviewNotes(String reviewNotes) {
+        this.reviewNotes = reviewNotes;
+    }
+
+    public void setActivities(List<ActivityDTO> activities) {
+        this.activities = activities;
     }
 }
 
