@@ -18,6 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/applications")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ApplicationController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationController.class);

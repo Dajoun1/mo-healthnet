@@ -188,6 +188,11 @@ function ApplicationForm() {
     4: { title: "Review & Submit", subtitle: "", icon: "fa-calendar-check" },
   };
 
+  // Calculate total hours for display
+  const totalHours = formData.activities?.reduce((sum, activity) => 
+    sum + (parseInt(activity.hoursPerMonth) || 0), 0
+  ) || 0;
+
   return (
     <div className="min-h-screen py-12 px-4 flex items-center justify-center relative my-10">
       <div className="absolute top-20 left-10 w-72 h-72 bg-[#0078AE]/50/10 rounded-full blur-3xl"></div>
@@ -272,4 +277,3 @@ function ApplicationForm() {
 }
 
 export default ApplicationForm;
-
