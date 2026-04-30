@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+﻿import { useState, useEffect } from "react";
 import ProgressBar from "./ProgressBar";
 import PersonalInfo from "./PersonalInfo";
 import ActivityInfo from "./ActivityInfo";
@@ -6,51 +6,77 @@ import Documentation from "./Documentation";
 import Review from "./Review";
 import { applicationApi } from "../../../services/applicationApi";
 import { useAuth } from "../../../context/AuthContext";
+import api from "../../../services/api";
 
 const TOTAL_STEPS = 4;
 
 function ApplicationForm() {
   const [step, setStep] = useState(1);
   const { user } = useAuth();
+
   const [formData, setFormData] = useState({
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
-    dob: "",
-    householdSize: "",
-    isMissouriResident: false,
-    ssnLast4: "",
     email: user?.username || user?.email || "",
     phone: "",
     streetAddress: "",
     city: "",
-    state: "",
+    state: "MO",
     zipCode: "",
-    activities: [], // Changed from single activity to array
+    birthDate: "",
+    isMissouriResident: true,
+    householdSize: "",
   });
-  const [proofFiles, setProofFiles] = useState([]); // Changed from single file to array
+
+  const [activities, setActivities] = useState([
+    { activityType: "", organizationName: "", hoursPerMonth: "" },
+  ]);
+
   const [errors, setErrors] = useState({});
   const [submitLoading, setSubmitLoading] = useState(false);
   const [touched, setTouched] = useState({});
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  // Fetch fresh profile from DB on mount — bypasses stale localStorage
+  useEffect(() => {
+    const email = user?.username || user?.email;
+    if (!email) { setProfileLoading(false); return; }
+
+    api.get(`/auth/profile?email=${encodeURIComponent(email)}`)
+      .then((res) => {
+        const p = res.data;
+        setFormData((prev) => ({
+          ...prev,
+          firstName: p.firstName || prev.firstName,
+          lastName: p.lastName || prev.lastName,
+          email: p.email || prev.email,
+          phone: p.phone || "",
+          streetAddress: p.streetAddress || "",
+          city: p.city || "",
+          state: p.state || "MO",
+          zipCode: p.zipCode || "",
+          birthDate: p.birthDate || "",
+        }));
+      })
+      .catch(() => {})
+      .finally(() => setProfileLoading(false));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetForm = () => {
     setFormData({
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
-      dob: "",
-      householdSize: "",
-      isMissouriResident: false,
-      ssnLast4: "",
       email: user?.username || user?.email || "",
-      activityType: "",
-      organizationName: "",
-      hoursPerMonth: "",
+      phone: "",
       streetAddress: "",
       city: "",
-      state: "",
+      state: "MO",
       zipCode: "",
-      activities: [],
+      birthDate: "",
+      isMissouriResident: true,
+      householdSize: "",
     });
-    setProofFiles([]);
+    setActivities([{ activityType: "", organizationName: "", hoursPerMonth: "" }]);
     setErrors({});
     setTouched({});
     setStep(1);
@@ -58,151 +84,91 @@ function ApplicationForm() {
 
   const validateStep = (stepNumber) => {
     const newErrors = {};
-
     if (stepNumber === 1) {
-      if (!formData.firstName?.trim())
-        newErrors.firstName = "First name is required";
-      if (!formData.lastName?.trim())
-        newErrors.lastName = "Last name is required";
-      if (!formData.dob) newErrors.dob = "Date of birth is required";
       if (!formData.householdSize || formData.householdSize < 1)
         newErrors.householdSize = "Valid household size (1 or more) required";
-      if (!/^\d{4}$/.test(formData.ssnLast4))
-        newErrors.ssnLast4 = "Exactly 4 digits required";
-      if (!/^\S+@\S+\.\S+$/.test(formData.email))
-        newErrors.email = "Valid email address required";
+      // Only validate these if they were missing from DB (editable fields)
+      if (!formData.birthDate)
+        newErrors.birthDate = "Date of birth is required";
       if (!formData.streetAddress?.trim())
         newErrors.streetAddress = "Street address is required";
       if (!formData.city?.trim())
         newErrors.city = "City is required";
-      if (!formData.state?.trim())
-        newErrors.state = "State is required";
-      else if (formData.state.trim().toUpperCase() !== "MO")
-        newErrors.state = "You must be a Missouri resident to apply";
+      if (!formData.state?.trim() || formData.state.trim().toUpperCase() !== "MO")
+        newErrors.state = "Must be a Missouri address (MO)";
       if (!/^\d{5}$/.test(formData.zipCode))
-        newErrors.zipCode = "Valid 5-digit ZIP code required";
-      if (!formData.isMissouriResident)
-        newErrors.isMissouriResident =
-          "You must confirm your Missouri residency to continue";
+        newErrors.zipCode = "Valid 5-digit ZIP required";
     } else if (stepNumber === 2) {
-      if (!formData.activities || formData.activities.length === 0) {
-        newErrors.activities = "Please add at least one activity";
-      } else {
-        const totalHours = formData.activities.reduce((sum, activity) => 
-          sum + (parseInt(activity.hoursPerMonth) || 0), 0
-        );
-        if (totalHours < 80) {
-          newErrors.totalHours = "Total hours across all activities must be at least 80 hours per month";
-        }
-      }
-    } else if (stepNumber === 3) {
-      if (!proofFiles || proofFiles.length === 0) {
-        newErrors.file = "Please upload at least one proof document";
-      }
+      activities.forEach((act, i) => {
+        if (!act.activityType)
+          newErrors[`activities.${i}.activityType`] = "Please select activity type";
+        if (!act.organizationName?.trim())
+          newErrors[`activities.${i}.organizationName`] = "Organization name is required";
+        if (!act.hoursPerMonth || act.hoursPerMonth < 1)
+          newErrors[`activities.${i}.hoursPerMonth`] = "Hours per month must be at least 1";
+      });
+      const totalHours = activities.reduce((sum, a) => sum + (Number(a.hoursPerMonth) || 0), 0);
+      if (totalHours < 80)
+        newErrors.hoursPerMonthWarning = `Total hours: ${totalHours}/month. At least 80 required for eligibility.`;
     }
-
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const getOrganizationLabel = (activityType = null) => {
-    const type = activityType || (formData.activities[formData.activities.length - 1]?.activityType);
-    switch (type) {
-      case "Employment":
-        return "Employer Name";
-      case "Education":
-        return "School Name";
-      case "Community Service":
-        return "Organization Name";
-      default:
-        return "Organization Name";
-    }
+    return Object.keys(newErrors).filter((k) => k !== "hoursPerMonthWarning").length === 0;
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
-  const handleBlur = (field) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const handleFilesChange = (files) => {
-    setProofFiles(files);
-    if (errors.file) setErrors((prev) => ({ ...prev, file: undefined }));
-  };
+  const handleBlur = (field) => setTouched((prev) => ({ ...prev, [field]: true }));
 
   const nextStep = () => {
     if (validateStep(step)) {
       setStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
       setErrors({});
     } else {
-      const step1Fields = [
-        "firstName", "lastName", "dob", "householdSize", "ssnLast4",
-        "email", "streetAddress", "city", "state", "zipCode", "isMissouriResident",
-      ];
-      const step2Fields = ["activities", "totalHours"];
-      const step3Fields = ["file"];
-      const fieldsToTouch =
-        step === 1 ? step1Fields : step === 2 ? step2Fields : step3Fields;
-      const newTouched = {};
-      fieldsToTouch.forEach((f) => (newTouched[f] = true));
-      setTouched((prev) => ({ ...prev, ...newTouched }));
+      if (step === 1) setTouched((prev) => ({
+        ...prev, householdSize: true, birthDate: true,
+        streetAddress: true, city: true, state: true, zipCode: true,
+      }));
+      if (step === 2) {
+        const newTouched = {};
+        activities.forEach((_, i) => {
+          newTouched[`activities.${i}.activityType`] = true;
+          newTouched[`activities.${i}.organizationName`] = true;
+          newTouched[`activities.${i}.hoursPerMonth`] = true;
+        });
+        setTouched((prev) => ({ ...prev, ...newTouched }));
+      }
     }
   };
 
-  const prevStep = () => {
-    setStep((prev) => Math.max(prev - 1, 1));
-    setErrors({});
-  };
+  const prevStep = () => { setStep((prev) => Math.max(prev - 1, 1)); setErrors({}); };
 
   const handleSubmit = async () => {
-    if (!validateStep(3)) return;
-
     setSubmitLoading(true);
-
-    const payload = new FormData();
-
-    // Add form data
-    Object.keys(formData).forEach((key) => {
-      if (key === 'activities') {
-        payload.append(key, JSON.stringify(formData[key]));
-      } else if (formData[key] !== undefined && formData[key] !== "") {
-        payload.append(key, formData[key]);
-      }
-    });
-
-    // Add multiple files
-    if (proofFiles && proofFiles.length > 0) {
-      proofFiles.forEach((fileItem, index) => {
-        payload.append(`proofDocuments`, fileItem.file);
-        payload.append(`proofDocument_${index}_name`, fileItem.name);
-        if (fileItem.description) {
-          payload.append(`proofDocument_${index}_description`, fileItem.description);
-        }
-      });
-    }
-
-    // Add user ID from auth context
-    if (user?.id) {
-      payload.append("userId", user.id);
-    }
-
-    // Add timestamp
-    payload.append("submittedAt", new Date().toISOString());
-
+    const payload = {
+      userId: user?.id || user?.userId || null,
+      userEmail: user?.username || user?.email || null,
+      householdSize: formData.householdSize,
+      phone: formData.phone || null,
+      streetAddress: formData.streetAddress,
+      city: formData.city,
+      state: formData.state?.toUpperCase() || "MO",
+      zipCode: formData.zipCode,
+      isMissouriResident: true,
+      activities: activities.map((a) => ({
+        activityType: a.activityType,
+        organizationName: a.organizationName,
+        hoursPerMonth: Number(a.hoursPerMonth),
+      })),
+    };
     try {
       const result = await applicationApi.submitApplication(payload);
-
       if (result.success) {
-        const applicationId = result.data.applicationId;
-        localStorage.setItem("lastApplicationId", applicationId);
-
-        alert(
-          `🎉 Application submitted successfully!\n\nApplication ID: ${applicationId}\nDocuments uploaded: ${proofFiles.length}\nActivities: ${formData.activities.length}\n\nWe'll review your application and contact you within 48 hours.`,
-        );
+        localStorage.setItem("lastApplicationId", result.data.applicationId);
+        alert(`🎉 Application submitted!\n\nApplication ID: ${result.data.applicationId}\nWe'll review and contact you within 48 hours.`);
         resetForm();
       } else {
         alert(`Submission failed: ${result.error}`);
@@ -217,9 +183,9 @@ function ApplicationForm() {
 
   const stepInfo = {
     1: { title: "Personal Details", subtitle: "", icon: "fa-user-circle" },
-    2: { title: "Activity Information", subtitle: "Add one or more activities", icon: "fa-chart-line" },
-    3: { title: "Documentation", subtitle: "Upload supporting documents", icon: "fa-file-alt" },
-    4: { title: "Review & Submit", subtitle: "", icon: "fa-regular fa-calendar-check" },
+    2: { title: "Activity Information", subtitle: "", icon: "fa-chart-line" },
+    3: { title: "Documentation", subtitle: "", icon: "fa-file-alt" },
+    4: { title: "Review & Submit", subtitle: "", icon: "fa-calendar-check" },
   };
 
   // Calculate total hours for display
@@ -233,98 +199,73 @@ function ApplicationForm() {
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
 
       <div className="max-w-4xl w-full relative z-10">
-        <div className="glass-card rounded-3xl p-8 md:p-10">
-          <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
-
-          <div className="mb-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-md text-[#0078AE] text-6xl mb-4">
-              <i className={`fas ${stepInfo[step].icon}`}></i>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">
-              {stepInfo[step].title}
-            </h2>
-            <p className="text-gray-500">{stepInfo[step].subtitle}</p>
+        {profileLoading ? (
+          <div className="glass-card rounded-3xl p-16 flex flex-col items-center gap-4">
+            <i className="fas fa-spinner fa-spin text-4xl text-[#0078AE]"></i>
+            <p className="text-gray-500 font-medium">Loading your profile...</p>
           </div>
+        ) : (
+          <div className="glass-card rounded-3xl p-8 md:p-10">
+            <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
 
-          {Object.keys(errors).length > 0 && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-300 rounded-2xl flex items-start gap-3">
-              <i className="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
-              <div>
-                <p className="text-sm font-semibold text-red-700">
-                  Please fix the following before continuing:
-                </p>
-                <ul className="mt-1 list-disc list-inside text-sm text-red-600 space-y-0.5">
-                  {Object.entries(errors).map(([key, msg]) => (
-                    <li key={key}>{msg}</li>
-                  ))}
-                </ul>
+            <div className="mb-8 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-md text-[#0078AE] text-6xl mb-4">
+                <i className={`fas ${stepInfo[step].icon}`}></i>
               </div>
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">{stepInfo[step].title}</h2>
+              <p className="text-gray-500">{stepInfo[step].subtitle}</p>
             </div>
-          )}
 
-          <div className="mb-10">
-            {step === 1 && (
-              <PersonalInfo
-                formData={formData}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                errors={errors}
-                touched={touched}
-              />
+            {Object.keys(errors).filter((k) => k !== "hoursPerMonthWarning").length > 0 && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-300 rounded-2xl flex items-start gap-3">
+                <i className="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+                <div>
+                  <p className="text-sm font-semibold text-red-700">Please fix the following before continuing:</p>
+                  <ul className="mt-1 list-disc list-inside text-sm text-red-600 space-y-0.5">
+                    {Object.entries(errors)
+                      .filter(([key]) => key !== "hoursPerMonthWarning")
+                      .map(([, msg]) => <li key={msg}>{msg}</li>)}
+                  </ul>
+                </div>
+              </div>
             )}
-            {step === 2 && (
-              <ActivityInfo
-                formData={formData}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                errors={errors}
-                touched={touched}
-                getOrganizationLabel={getOrganizationLabel}
-              />
+
+            {errors.hoursPerMonthWarning && (
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-300 rounded-2xl flex items-start gap-3">
+                <i className="fas fa-exclamation-triangle text-yellow-600 mt-0.5"></i>
+                <p className="text-sm text-yellow-800">{errors.hoursPerMonthWarning}</p>
+              </div>
             )}
-            {step === 3 && (
-              <Documentation
-                files={proofFiles}
-                onFilesChange={handleFilesChange}
-                errors={errors}
-              />
-            )}
-            {step === 4 && (
-              <Review
-                formData={formData}
-                files={proofFiles}
-                onSubmit={handleSubmit}
-                onBack={prevStep}
-                submitLoading={submitLoading}
-                getOrganizationLabel={getOrganizationLabel}
-                totalHours={totalHours}
-              />
+
+            <div className="mb-10">
+              {step === 1 && (
+                <PersonalInfo formData={formData} onChange={handleChange} onBlur={handleBlur} errors={errors} touched={touched} />
+              )}
+              {step === 2 && (
+                <ActivityInfo activities={activities} onActivitiesChange={setActivities} errors={errors} touched={touched} onBlur={handleBlur} />
+              )}
+              {step === 3 && <Documentation />}
+              {step === 4 && (
+                <Review formData={formData} activities={activities} onSubmit={handleSubmit} onBack={prevStep} submitLoading={submitLoading} />
+              )}
+            </div>
+
+            {step !== 4 && (
+              <div className="flex gap-4 pt-6 border-t border-gray-200">
+                {step > 1 ? (
+                  <button onClick={prevStep} className="btn-secondary flex-1 flex items-center justify-center gap-2">
+                    <i className="fas fa-arrow-left"></i> Back
+                  </button>
+                ) : (
+                  <div className="flex-1"></div>
+                )}
+                <button onClick={nextStep} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                  Continue <i className="fas fa-arrow-right"></i>
+                </button>
+              </div>
             )}
           </div>
-
-          {step !== 4 && (
-            <div className="flex gap-4 pt-6 border-t border-gray-200">
-              {step > 1 ? (
-                <button
-                  onClick={prevStep}
-                  className="btn-secondary flex-1 flex items-center justify-center gap-2"
-                >
-                  <i className="fas fa-arrow-left"></i>
-                  Back
-                </button>
-              ) : (
-                <div className="flex-1"></div>
-              )}
-              <button
-                onClick={nextStep}
-                className="btn-primary flex-1 flex items-center justify-center gap-2"
-              >
-                Continue
-                <i className="fas fa-arrow-right"></i>
-              </button>
-            </div>
-          )}
-        </div>
+        )}
 
         <div className="text-center mt-6 text-white/60 text-sm">
           <i className="fas fa-lock mr-2"></i>

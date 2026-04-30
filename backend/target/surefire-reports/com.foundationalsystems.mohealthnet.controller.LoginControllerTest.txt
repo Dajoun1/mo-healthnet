@@ -1,4 +1,12 @@
 -------------------------------------------------------------------------------
 Test set: com.foundationalsystems.mohealthnet.controller.LoginControllerTest
 -------------------------------------------------------------------------------
+<<<<<<< HEAD
 Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.889 s -- in com.foundationalsystems.mohealthnet.controller.LoginControllerTest
+=======
+<<<<<<< HEAD
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.870 s -- in com.foundationalsystems.mohealthnet.controller.LoginControllerTest
+=======
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.552 s -- in com.foundationalsystems.mohealthnet.controller.LoginControllerTest
+>>>>>>> c1ef590e618c4184ab6c7b29a955c729480312a9
+>>>>>>> develop

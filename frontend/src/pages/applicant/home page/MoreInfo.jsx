@@ -127,12 +127,12 @@ const HowToApply = () => {
               onClick={() => setActiveTab(step.id)}
               className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
                 activeTab === step.id
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                  ? 'bg-[#0078AE] text-white shadow-lg shadow-blue-200'
                   : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
               }`}
             >
               <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                activeTab === step.id ? 'bg-white text-blue-600' : 'bg-gray-200 text-gray-600'
+                activeTab === step.id ? 'bg-white text-[#0078AE]' : 'bg-gray-200 text-gray-600'
               }`}>
                 {idx + 1}
               </span>

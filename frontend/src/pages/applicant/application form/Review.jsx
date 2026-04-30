@@ -1,17 +1,9 @@
-﻿const Review = ({
-  formData,
-  files,
-  onSubmit,
-  onBack,
-  submitLoading,
-  getOrganizationLabel,
-  totalHours,
-}) => {
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "-";
-    const [year, month, day] = dateStr.split("-");
-    return `${month}-${day}-${year}`;
-  };
+﻿const Review = ({ formData, activities, onSubmit, onBack, submitLoading }) => {
+  const totalHours = activities.reduce(
+    (sum, a) => sum + (Number(a.hoursPerMonth) || 0),
+    0
+  );
+  const isEligible = formData.isMissouriResident && totalHours >= 80;
 
   const renderReviewSection = (title, icon, items) => (
     <div className="mb-6">
@@ -40,12 +32,7 @@
       label: "Full Name",
       value: `${formData.firstName || ""} ${formData.lastName || ""}`.trim(),
     },
-    { label: "Date of Birth", value: formatDate(formData.dob) },
     { label: "Household Size", value: formData.householdSize || "-" },
-    {
-      label: "SSN (Last 4)",
-      value: formData.ssnLast4 ? `***-**-${formData.ssnLast4}` : "-",
-    },
     { label: "Email", value: formData.email || "-" },
     { label: "Phone", value: formData.phone || "-" },
     { label: "Street Address", value: formData.streetAddress || "-" },
@@ -62,8 +49,6 @@
     },
   ];
 
-  const isEligible = formData.isMissouriResident && totalHours >= 80;
-
   return (
     <div className="space-y-6">
       {!isEligible && (
@@ -76,7 +61,7 @@
                 {!formData.isMissouriResident &&
                   "You must be a Missouri resident to apply. "}
                 {totalHours < 80 &&
-                  `Total hours: ${totalHours}/80 - Need at least 80 hours per month. `}
+                  `You need at least 80 combined hours per month (currently ${totalHours}). `}
                 Please review your application before submitting.
               </p>
             </div>
@@ -86,97 +71,66 @@
 
       {renderReviewSection("Personal Information", "fa-user", personalItems)}
 
-      {/* Activities Section */}
+      {/* Activities */}
       <div className="mb-6">
         <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
           <i className="fas fa-chart-line text-[#0078AE]"></i>
-          Activities ({formData.activities?.length || 0})
+          Activity Details
         </h3>
-        <div className="space-y-3">
-          {formData.activities?.map((activity, index) => (
-            <div key={index} className="bg-gray-50 rounded-2xl p-4">
-              <div className="flex justify-between items-start mb-2">
-                <span className="font-semibold text-gray-800">
-                  {activity.activityType}
+        {activities.map((act, idx) => (
+          <div
+            key={idx}
+            className="bg-gray-50 rounded-2xl p-4 space-y-2 mb-3"
+          >
+            <p className="text-xs font-semibold text-gray-500 uppercase mb-2">
+              Activity #{idx + 1}
+            </p>
+            {[
+              { label: "Activity Type", value: act.activityType },
+              { label: "Organization / Employer", value: act.organizationName },
+              { label: "Hours / Month", value: act.hoursPerMonth },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0"
+              >
+                <span className="text-gray-600 text-sm">{item.label}</span>
+                <span className="font-medium text-gray-800 text-sm">
+                  {item.value || "-"}
                 </span>
               </div>
-              <div className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">
-                    {getOrganizationLabel(activity.activityType)}:
-                  </span>
-                  <span className="font-medium text-gray-800">
-                    {activity.organizationName}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Hours/Month:</span>
-                  <span className="font-medium text-gray-800">
-                    {activity.hoursPerMonth} hrs
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-          <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-gray-800">
-                Total Monthly Hours:
-              </span>
-              <span
-                className={`font-bold text-lg ${totalHours >= 80 ? "text-green-600" : "text-orange-600"}`}
-              >
-                {totalHours} hours
-              </span>
-            </div>
+            ))}
           </div>
-        </div>
-      </div>
-
-      {/* Documents Section */}
-      <div className="mb-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-          <i className="fas fa-paperclip text-[#0078AE]"></i>
-          Supporting Documents ({files?.length || 0})
-        </h3>
-        <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
-          {files && files.length > 0 ? (
-            files.map((file, index) => (
-              <div
-                key={index}
-                className="py-2 border-b border-gray-200 last:border-0"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium text-gray-800">{file.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {(file.size / 1024 / 1024).toFixed(2)} MB • Uploaded{" "}
-                      {new Date(file.uploadDate).toLocaleDateString()}
-                    </p>
-                    {file.description && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        {file.description}
-                      </p>
-                    )}
-                  </div>
-                  <i className="fas fa-check-circle text-green-500"></i>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-center py-4">
-              No documents uploaded
-            </p>
-          )}
+        ))}
+        <div className="flex justify-between items-center px-4 py-3 bg-blue-50 rounded-2xl border border-blue-200">
+          <span className="text-blue-700 font-semibold text-sm">
+            Total Hours / Month
+          </span>
+          <span
+            className={`font-bold text-sm ${
+              totalHours >= 80 ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {totalHours} hrs{" "}
+            {totalHours >= 80 ? "✓ Eligible" : "✗ Below 80"}
+          </span>
         </div>
       </div>
 
       <div
-        className={`rounded-2xl p-4 ${isEligible ? "bg-green-50 border border-green-300" : "bg-yellow-50 border border-yellow-300"}`}
+        className={`rounded-2xl p-4 ${
+          isEligible
+            ? "bg-green-50 border border-green-300"
+            : "bg-yellow-50 border border-yellow-300"
+        }`}
       >
         <div className="flex items-start gap-3">
           <i
-            className={`fas ${isEligible ? "fa-check-circle text-green-600" : "fa-info-circle text-yellow-600"} mt-0.5`}
+            className={`fas ${
+              isEligible
+                ? "fa-check-circle text-green-600"
+                : "fa-info-circle text-yellow-600"
+            } mt-0.5`}
           ></i>
           <div>
             <p className="text-sm font-semibold text-gray-800">

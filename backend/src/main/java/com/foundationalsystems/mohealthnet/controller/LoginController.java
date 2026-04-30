@@ -23,6 +23,34 @@ public class LoginController {
     @Autowired
     protected AuthenticationService authenticationService;
 
+    @GetMapping("/profile")
+    public ResponseEntity<Map<String, Object>> getProfile(@RequestParam String email) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<User> userOptional = authenticationService.findUserByEmail(email);
+        if (userOptional.isEmpty()) {
+            response.put("success", false);
+            response.put("message", "User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        User user = userOptional.get();
+        response.put("success", true);
+        response.put("userId", user.getId());
+        response.put("email", user.getUsername());
+        response.put("firstName", user.getFirstName());
+        response.put("lastName", user.getLastName());
+        response.put("role", user.getRole());
+        response.put("phone", user.getPhone());
+        response.put("streetAddress", user.getStreetAddress());
+        response.put("city", user.getCity());
+        response.put("state", user.getState());
+        response.put("zipCode", user.getZipCode());
+        response.put("birthDate", user.getBirthDate() != null ? user.getBirthDate().toString() : null);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Test endpoint for checking login endpoint availability.
+     */
     @GetMapping("/login")
     public String login() {
         LOG.info("GET /auth/login endpoint called");
@@ -60,6 +88,12 @@ public class LoginController {
                 response.put("lastName", user.getLastName());
                 response.put("role", user.getRole());
                 response.put("status", user.getStatus()); // Include status in response
+                response.put("phone", user.getPhone());
+                response.put("streetAddress", user.getStreetAddress());
+                response.put("city", user.getCity());
+                response.put("state", user.getState());
+                response.put("zipCode", user.getZipCode());
+                response.put("birthDate", user.getBirthDate() != null ? user.getBirthDate().toString() : null);
                 LOG.info("User authenticated successfully: {}", email);
                 return ResponseEntity.ok(response);
             }
@@ -81,6 +115,10 @@ public class LoginController {
         String middleName = (String) userData.get("middleName");
         String phone = (String) userData.get("phone");
         String roleStr = (String) userData.get("role");
+        String streetAddress = (String) userData.get("streetAddress");
+        String city = (String) userData.get("city");
+        String state = (String) userData.get("state");
+        String zipCode = (String) userData.get("zipCode");
 
         if (email == null || email.trim().isEmpty() ||
                 password == null || password.isEmpty() ||
@@ -110,8 +148,9 @@ public class LoginController {
             }
 
             User user = authenticationService.registerUser(
-                    email, password, firstName, middleName, lastName,
-                    birthDate, ssn, phone, role);
+                email, password, firstName, middleName, lastName,
+                birthDate, ssn, phone, streetAddress, city, state, zipCode, role
+            );
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "User registered successfully");

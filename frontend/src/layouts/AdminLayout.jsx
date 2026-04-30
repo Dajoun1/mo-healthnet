@@ -15,3 +15,7 @@ const AdminLayout = () => {
 };
 
 export default AdminLayout;
+<<<<<<< HEAD
+=======
+
+>>>>>>> develop
