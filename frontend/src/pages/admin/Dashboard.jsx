@@ -6,21 +6,22 @@ import {
   LockClosedIcon,
   PlusIcon,
   XMarkIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { adminApi } from "../../services/adminApi";
 
-const ROLES = ["All", "ADMIN", "EMPLOYEE", "APPLICANT"];
+const ROLES = ["All", "Admin", "Employee", "Applicant"];
 
 const ROLE_BADGE = {
-  ADMIN: "bg-purple-100 text-purple-700",
-  EMPLOYEE: "bg-blue-100 text-blue-700",
-  APPLICANT: "bg-green-100 text-green-700",
+  Admin: "bg-purple-100 text-purple-700",
+  Employee: "bg-blue-100 text-blue-700",
+  Applicant: "bg-green-100 text-green-700",
 };
 
 const STATUS_BADGE = {
-  ACTIVE: "bg-green-100 text-green-700",
-  LOCKED: "bg-red-100 text-red-700",
-  DISABLED: "bg-gray-100 text-gray-700",
+  Active: "bg-green-100 text-green-700",
+  Locked: "bg-red-100 text-red-700",
+  Disabled: "bg-gray-100 text-gray-700",
 };
 
 const EMPTY_FORM = {
@@ -28,7 +29,7 @@ const EMPTY_FORM = {
   lastName: "",
   middleName: "",
   email: "",
-  role: "APPLICANT",
+  role: "Applicant",
 };
 
 const AdminDashboard = () => {
@@ -72,7 +73,7 @@ const AdminDashboard = () => {
         );
       } else if (currentFilter !== "All") {
         // Get users by role with pagination
-        const roleForApi = currentFilter.toUpperCase();
+        const roleForApi = currentFilter; // Already capitalized
         response = await adminApi.getUsersByRole(
           roleForApi,
           currentPage,
@@ -111,6 +112,15 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error("Error fetching stats:", err);
     }
+  };
+
+  // Handle manual refresh
+  const handleRefresh = async () => {
+    setSelectedUsers([]);
+    await Promise.all([
+      fetchUsers(page, activeFilter),
+      fetchStats()
+    ]);
   };
 
   useEffect(() => {
@@ -182,9 +192,9 @@ const AdminDashboard = () => {
   const getRoleCount = (role) => {
     if (!stats) return 0;
     if (role === "All") return stats.totalUsers || 0;
-    if (role === "ADMIN") return stats.adminUsers || 0;
-    if (role === "EMPLOYEE") return stats.employeeUsers || 0;
-    if (role === "APPLICANT") return stats.applicantUsers || 0;
+    if (role === "Admin") return stats.adminUsers || 0;
+    if (role === "Employee") return stats.employeeUsers || 0;
+    if (role === "Applicant") return stats.applicantUsers || 0;
     return 0;
   };
 
@@ -245,7 +255,7 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       if (modalMode === "add") {
-        await adminApi.createUser?.(formData);
+        await adminApi.createUser(formData);
       } else {
         await adminApi.updateUserInfo(editingId, {
           firstName: formData.firstName,
@@ -299,7 +309,7 @@ const AdminDashboard = () => {
   const handleToggleLock = async (userId, currentStatus) => {
     setLoading(true);
     try {
-      const newStatus = currentStatus === "LOCKED" ? "ACTIVE" : "LOCKED";
+      const newStatus = currentStatus === "Locked" ? "Active" : "Locked";
       await adminApi.updateUserStatus(userId, newStatus);
       if (searchMode) {
         await handleSearch({ preventDefault: () => {} });
@@ -403,14 +413,14 @@ const AdminDashboard = () => {
           {selectedUsers.length > 0 && (
             <div className="flex gap-2">
               <button
-                onClick={() => handleBulkStatusUpdate("ACTIVE")}
+                onClick={() => handleBulkStatusUpdate("Active")}
                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
                 <LockOpenIcon className="w-4 h-4" />
                 Unlock ({selectedUsers.length})
               </button>
               <button
-                onClick={() => handleBulkStatusUpdate("LOCKED")}
+                onClick={() => handleBulkStatusUpdate("Locked")}
                 className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
                 <LockClosedIcon className="w-4 h-4" />
@@ -418,6 +428,15 @@ const AdminDashboard = () => {
               </button>
             </div>
           )}
+          <button
+            onClick={handleRefresh}
+            disabled={loading}
+            className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Refresh users and statistics"
+          >
+            <ArrowPathIcon className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
           <button
             onClick={openAddModal}
             className="flex items-center gap-2 bg-[#0078AE] hover:bg-[#005f8a] text-white px-4 py-2 rounded-lg font-medium transition-colors"
@@ -527,7 +546,11 @@ const AdminDashboard = () => {
                 users.map((user) => (
                   <tr
                     key={user.id}
-                    className="hover:bg-gray-50 transition-colors"
+                    className={`transition-colors ${
+                      user.status === "Disabled"
+                        ? "bg-gray-50 opacity-60"
+                        : "hover:bg-gray-50"
+                    }`}
                   >
                     <td className="px-6 py-4">
                       <input
@@ -550,12 +573,12 @@ const AdminDashboard = () => {
                         }
                         disabled={roleUpdateLoading === user.id}
                         className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border-0 focus:ring-2 focus:ring-[#0078AE] ${
-                          ROLE_BADGE[user.role] || ROLE_BADGE.APPLICANT
+                          ROLE_BADGE[user.role] || ROLE_BADGE.Applicant
                         }`}
                       >
-                        <option value="ADMIN">Admin</option>
-                        <option value="EMPLOYEE">Employee</option>
-                        <option value="APPLICANT">Applicant</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Employee">Employee</option>
+                        <option value="Applicant">Applicant</option>
                       </select>
                       {roleUpdateLoading === user.id && (
                         <span className="ml-2 text-xs text-gray-400">
@@ -566,12 +589,12 @@ const AdminDashboard = () => {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                          STATUS_BADGE[user.status] || STATUS_BADGE.ACTIVE
+                          STATUS_BADGE[user.status] || STATUS_BADGE.Active
                         }`}
                       >
-                        {user.status === "ACTIVE"
+                        {user.status === "Active"
                           ? "✓ Active"
-                          : user.status === "LOCKED"
+                          : user.status === "Locked"
                             ? "🔒 Locked"
                             : "⊘ Disabled"}
                       </span>
@@ -581,17 +604,17 @@ const AdminDashboard = () => {
                         <button
                           onClick={() => handleToggleLock(user.id, user.status)}
                           title={
-                            user.status === "LOCKED"
+                            user.status === "Locked"
                               ? "Unlock account"
                               : "Lock account"
                           }
                           className={`p-1.5 rounded-md transition-colors ${
-                            user.status === "LOCKED"
+                            user.status === "Locked"
                               ? "text-amber-600 hover:bg-amber-50"
                               : "text-gray-400 hover:bg-gray-100 hover:text-amber-600"
                           }`}
                         >
-                          {user.status === "LOCKED" ? (
+                          {user.status === "Locked" ? (
                             <LockOpenIcon className="w-4 h-4" />
                           ) : (
                             <LockClosedIcon className="w-4 h-4" />
@@ -775,9 +798,9 @@ const AdminDashboard = () => {
                     onChange={handleFormChange}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0078AE]"
                   >
-                    <option value="ADMIN">Admin</option>
-                    <option value="EMPLOYEE">Employee</option>
-                    <option value="APPLICANT">Applicant</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Employee">Employee</option>
+                    <option value="Applicant">Applicant</option>
                   </select>
                 </div>
               )}
@@ -811,11 +834,10 @@ const AdminDashboard = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-2">
-              Delete User
+              Disable User
             </h2>
             <p className="text-sm text-gray-500 mb-6">
-              Are you sure you want to delete this user? This action cannot be
-              undone.
+              Are you sure you want to disable this user? The user account will be set to inactive and will no longer be able to log in. Applications and data will be preserved.
             </p>
             <div className="flex justify-end gap-3">
               <button
@@ -827,9 +849,9 @@ const AdminDashboard = () => {
               <button
                 onClick={handleDelete}
                 disabled={loading}
-                className="px-4 py-2 text-sm rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-medium transition-colors disabled:opacity-50"
               >
-                {loading ? "Deleting..." : "Delete"}
+                {loading ? "Disabling..." : "Disable User"}
               </button>
             </div>
           </div>

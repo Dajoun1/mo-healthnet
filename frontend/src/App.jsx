@@ -37,7 +37,7 @@ function App() {
           <Route
             path="/applicant"
             element={
-              <ProtectedRoute allowedRoles={["APPLICANT"]}>
+              <ProtectedRoute allowedRoles={["Applicant"]}>
                 <ApplicantLayout />
               </ProtectedRoute>
             }
@@ -50,7 +50,7 @@ function App() {
           <Route
             path="/caseworker"
             element={
-              <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+              <ProtectedRoute allowedRoles={["Employee"]}>
                 <CaseworkerLayout />
               </ProtectedRoute>
             }
@@ -62,7 +62,7 @@ function App() {
           <Route
             path="/admin"
             element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <ProtectedRoute allowedRoles={["Admin"]}>
                 <AdminLayout />
               </ProtectedRoute>
             }

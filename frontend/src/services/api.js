@@ -5,8 +5,8 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 const normalizeRole = (role) => {
     const value = (role || '').toString().trim();
     if (!value) return null;
-    // Return uppercase to match backend enum and frontend expectations
-    return value.toUpperCase();
+    // Return capitalized case to match backend enum (e.g., "Admin", "Employee", "Applicant")
+    return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 };
 
 const api = axios.create({

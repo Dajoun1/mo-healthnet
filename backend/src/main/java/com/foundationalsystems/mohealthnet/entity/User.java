@@ -63,7 +63,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserStatus status = UserStatus.ACTIVE;
+    private UserStatus status = UserStatus.Active;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -79,14 +79,15 @@ public class User {
     }
 
     public enum UserRole {
-        APPLICANT,
-        EMPLOYEE,
-        ADMIN
+        Applicant,
+        Employee,
+        Admin
     }
 
     public enum UserStatus {
-        ACTIVE,
-        LOCKED,
-        DISABLED
+        Active,
+        Locked,
+        Disabled,
+        Pending
     }
 }

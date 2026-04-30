@@ -50,4 +50,8 @@ public class AttachmentService {
     public List<Attachment> getAttachmentsByApplicationId(Integer applicationId) {
         return attachmentRepository.findByApplicationId(applicationId);
     }
+
+    public FileStorage getFileById(Integer fileId) {
+        return fileStorageRepository.findById(fileId).orElse(null);
+    }
 }

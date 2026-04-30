@@ -1,5 +1,6 @@
 package com.foundationalsystems.mohealthnet.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -43,6 +44,9 @@ public class Application {
     @Column(name = "is_missouri_resident", nullable = false)
     private Boolean isMissouriResident = false;
 
+    @Column(name = "total_hours_per_month", nullable = false)
+    private Integer totalHoursPerMonth = 0;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ApplicationStatus status = ApplicationStatus.Pending;
@@ -50,7 +54,17 @@ public class Application {
     @Column(name = "submitted_at", nullable = false, updatable = false)
     private LocalDateTime submittedAt;
 
-    @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @Column(name = "reviewed_by")
+    private Integer reviewedBy;
+
+    @Column(name = "reviewed_at")
+    private LocalDateTime reviewedAt;
+
+    @Column(name = "review_notes", columnDefinition = "TEXT")
+    private String reviewNotes;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ApplicationActivity> activities = new ArrayList<>();
 
     @PrePersist

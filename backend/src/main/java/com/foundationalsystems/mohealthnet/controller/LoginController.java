@@ -138,7 +138,7 @@ public class LoginController {
                 birthDate = LocalDate.parse(birthDateStr);
             }
 
-            User.UserRole role = User.UserRole.APPLICANT;
+            User.UserRole role = User.UserRole.Applicant;
             if (roleStr != null && !roleStr.trim().isEmpty()) {
                 try {
                     role = User.UserRole.valueOf(roleStr);
