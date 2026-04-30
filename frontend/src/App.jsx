@@ -29,10 +29,9 @@ function App() {
           <Route path="/" element={<ApplicantLayout />}>
             <Route index element={<Home />} />
             <Route path="about" element={<About />} />
+            <Route path="/signin" element={<Signin />} />
+            <Route path="/signup" element={<Signup />} />
           </Route>
-          
-          <Route path="/signin" element={<Signin />} />
-          <Route path="/signup" element={<Signup />} />
 
           {/* Protected Applicant Routes */}
           <Route

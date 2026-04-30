@@ -1,5 +1,6 @@
 package com.foundationalsystems.mohealthnet.controller;
 
+import com.foundationalsystems.mohealthnet.dto.UserSummary;
 import com.foundationalsystems.mohealthnet.entity.User;
 import com.foundationalsystems.mohealthnet.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,15 +80,40 @@ public class AdminController {
     }
 
     @GetMapping("/users/role/{role}")
-    public ResponseEntity<List<User>> getUsersByRole(@PathVariable User.UserRole role) {
-        List<User> users = adminService.getUsersByRole(role);
-        return ResponseEntity.ok(users);
+    public ResponseEntity<Map<String, Object>> getUsersByRole(
+            @PathVariable User.UserRole role,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserSummary> usersPage = adminService.getUsersByRole(role, pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("users", usersPage.getContent());
+        response.put("currentPage", usersPage.getNumber());
+        response.put("totalItems", usersPage.getTotalElements());
+        response.put("totalPages", usersPage.getTotalPages());
+        response.put("pageSize", usersPage.getSize());
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/users/status/{status}")
-    public ResponseEntity<List<User>> getUsersByStatus(@PathVariable User.UserStatus status) {
-        List<User> users = adminService.getUsersByStatus(status);
-        return ResponseEntity.ok(users);
+    public ResponseEntity<Map<String, Object>> getUsersByStatus(
+            @PathVariable User.UserStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserSummary> usersPage = adminService.getUsersByStatus(status, pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("users", usersPage.getContent());
+        response.put("currentPage", usersPage.getNumber());
+        response.put("totalItems", usersPage.getTotalElements());
+        response.put("totalPages", usersPage.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/users/{userId}/role")

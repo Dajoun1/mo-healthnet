@@ -1,5 +1,6 @@
 package com.foundationalsystems.mohealthnet.service;
 
+import com.foundationalsystems.mohealthnet.dto.UserSummary;
 import com.foundationalsystems.mohealthnet.entity.User;
 import com.foundationalsystems.mohealthnet.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,15 +35,22 @@ public class AdminService {
         return userRepository.searchUsers(searchTerm, pageable);
     }
 
-    public List<User> getUsersByRole(User.UserRole role) {
+    public Page<UserSummary> getUsersByRole(User.UserRole role, Pageable pageable) {
+        return userRepository.findByRole(role, pageable);
+    }
+
+    public Page<UserSummary> getUsersByStatus(User.UserStatus status, Pageable pageable) {
+        return userRepository.findByStatus(status, pageable);
+    }
+
+    public List<UserSummary> getUsersByRole(User.UserRole role) {
         return userRepository.findByRole(role);
     }
 
-    public List<User> getUsersByStatus(User.UserStatus status) {
+    public List<UserSummary> getUsersByStatus(User.UserStatus status) {
         return userRepository.findByStatus(status);
     }
 
-    // Add this helper method to AdminService
     private User.UserRole parseRole(String roleStr) {
         if (roleStr == null) {
             return null;
@@ -71,7 +79,6 @@ public class AdminService {
         }
     }
 
-    // Update updateUserRole method
     @Transactional
     public User updateUserRole(Integer userId, String roleStr) {
         Optional<User> userOptional = userRepository.findById(userId);
@@ -82,7 +89,6 @@ public class AdminService {
         User user = userOptional.get();
         User.UserRole newRole = parseRole(roleStr);
 
-        // Prevent admin from changing their own role to non-admin (optional)
         user.setRole(newRole);
         User updatedUser = userRepository.save(user);
 
@@ -98,8 +104,6 @@ public class AdminService {
         }
 
         User user = userOptional.get();
-
-        // Prevent admin from disabling/locking their own account
 
         user.setStatus(newStatus);
         User updatedUser = userRepository.save(user);

@@ -1,5 +1,6 @@
 package com.foundationalsystems.mohealthnet.repository;
 
+import com.foundationalsystems.mohealthnet.dto.UserSummary;
 import com.foundationalsystems.mohealthnet.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,9 +20,14 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     boolean existsByUsername(String username);
 
-    List<User> findByRole(User.UserRole role);
 
-    List<User> findByStatus(User.UserStatus status);
+    Page<UserSummary> findByRole(User.UserRole role, Pageable pageable);
+
+    Page<UserSummary> findByStatus(User.UserStatus status, Pageable pageable);
+
+    List<UserSummary> findByRole(User.UserRole role);
+
+    List<UserSummary> findByStatus(User.UserStatus status);
 
     @Query("SELECT u FROM User u WHERE " +
             "LOWER(u.firstName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +

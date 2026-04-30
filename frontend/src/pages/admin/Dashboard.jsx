@@ -71,8 +71,10 @@ const AdminDashboard = () => {
           pageSize,
         );
       } else if (currentFilter !== "All") {
+        // Get users by role with pagination
+        const roleForApi = currentFilter.toUpperCase();
         response = await adminApi.getUsersByRole(
-          currentFilter,
+          roleForApi,
           currentPage,
           pageSize,
         );
@@ -85,10 +87,10 @@ const AdminDashboard = () => {
         );
       }
 
-      setUsers(response.users || response.content || []);
+      setUsers(response.users || []);
       setTotalPages(response.totalPages || 0);
       setTotalItems(response.totalItems || 0);
-      setPage(response.currentPage || response.number || 0);
+      setPage(response.currentPage || 0);
 
       if (resetPage) {
         setPage(0);
@@ -135,14 +137,11 @@ const AdminDashboard = () => {
       setError(null);
 
       try {
-        // Direct API call with the current search term
         const response = await adminApi.searchUsers(searchValue, 0, pageSize);
-
-        // Update all states
         setSearchMode(true);
         setActiveFilter("All");
         setSelectedUsers([]);
-        setUsers(response.users || response.content || []);
+        setUsers(response.users || []);
         setTotalPages(response.totalPages || 0);
         setTotalItems(response.totalItems || 0);
         setPage(0);
@@ -162,20 +161,15 @@ const AdminDashboard = () => {
     setError(null);
 
     try {
-      // Direct API call to get all users
       const response = await adminApi.getAllUsers(0, pageSize, sortBy, sortDir);
-
-      // Reset all state variables
       setSearchTerm("");
       setSearchMode(false);
       setActiveFilter("All");
       setSelectedUsers([]);
-      setUsers(response.users || response.content || []);
+      setUsers(response.users || []);
       setTotalPages(response.totalPages || 0);
       setTotalItems(response.totalItems || 0);
       setPage(0);
-
-      // Refresh stats
       await fetchStats();
     } catch (err) {
       console.error("Error in clearSearch:", err);
@@ -188,9 +182,9 @@ const AdminDashboard = () => {
   const getRoleCount = (role) => {
     if (!stats) return 0;
     if (role === "All") return stats.totalUsers || 0;
-    if (role === "ADMIN") return stats.totalAdmins || 0;
-    if (role === "EMPLOYEE") return stats.totalEmployees || 0;
-    if (role === "APPLICANT") return stats.totalApplicants || 0;
+    if (role === "ADMIN") return stats.adminUsers || 0;
+    if (role === "EMPLOYEE") return stats.employeeUsers || 0;
+    if (role === "APPLICANT") return stats.applicantUsers || 0;
     return 0;
   };
 
@@ -321,7 +315,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Update role 
+  // Update role
   const handleRoleChange = async (userId, newRole) => {
     setRoleUpdateLoading(userId);
     try {
@@ -487,8 +481,8 @@ const AdminDashboard = () => {
               }`}
           >
             {role === "All"
-              ? "All"
-              : role.charAt(0) + role.slice(1).toLowerCase()}
+              ? "All Users"
+              : role.charAt(0) + role.slice(1).toLowerCase() + "s"}
             <span className="ml-2 text-xs font-semibold">
               ({getRoleCount(role)})
             </span>

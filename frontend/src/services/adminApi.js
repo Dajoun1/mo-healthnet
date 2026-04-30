@@ -1,10 +1,8 @@
-
 import api from './api';
 
 export const adminApi = {
 
-    //  Get all users with pagination and sorting
-
+    // Get all users with pagination and sorting
     getAllUsers: async (page = 0, size = 10, sortBy = 'id', sortDir = 'asc') => {
         try {
             const response = await api.get('/api/admin/users', {
@@ -16,7 +14,7 @@ export const adminApi = {
         }
     },
 
-    //   Search users by name or email
+    // Search users by name or email
     searchUsers: async (term, page = 0, size = 10) => {
         try {
             const response = await api.get('/api/admin/users/search', {
@@ -28,7 +26,7 @@ export const adminApi = {
         }
     },
 
-    //   Get user by ID
+    // Get user by ID
     getUserById: async (userId) => {
         try {
             const response = await api.get(`/api/admin/users/${userId}`);
@@ -38,33 +36,32 @@ export const adminApi = {
         }
     },
 
-    //   Get users by role with pagination
+    // Get users by role with pagination - FIXED
     getUsersByRole: async (role, page = 0, size = 10) => {
         try {
             const response = await api.get(`/api/admin/users/role/${role}`, {
                 params: { page, size }
             });
-            return response.data;
+            return response.data; // Now returns { users, totalPages, totalItems, currentPage }
         } catch (error) {
+            console.error('Error fetching users by role:', error);
             throw error.response?.data || { message: 'Failed to fetch users by role' };
         }
     },
 
-
-    //  Get users by status
-
-    getUsersByStatus: async (status) => {
+    // Get users by status with pagination - FIXED
+    getUsersByStatus: async (status, page = 0, size = 10) => {
         try {
-            const response = await api.get(`/api/admin/users/status/${status}`);
+            const response = await api.get(`/api/admin/users/status/${status}`, {
+                params: { page, size }
+            });
             return response.data;
         } catch (error) {
             throw error.response?.data || { message: 'Failed to fetch users by status' };
         }
     },
 
-
-    //   Update user role
-
+    // Update user role
     updateUserRole: async (userId, role) => {
         try {
             const response = await api.put(`/api/admin/users/${userId}/role`, { role });
@@ -74,9 +71,7 @@ export const adminApi = {
         }
     },
 
-
-    //   Update user status
-
+    // Update user status
     updateUserStatus: async (userId, status) => {
         try {
             const response = await api.put(`/api/admin/users/${userId}/status`, { status });
@@ -86,7 +81,7 @@ export const adminApi = {
         }
     },
 
-    //  Delete user
+    // Delete user
     deleteUser: async (userId) => {
         try {
             const response = await api.delete(`/api/admin/users/${userId}`);
@@ -96,8 +91,7 @@ export const adminApi = {
         }
     },
 
-    //   Update user information (name and email)
-
+    // Update user information
     updateUserInfo: async (userId, userData) => {
         try {
             const response = await api.put(`/api/admin/users/${userId}`, userData);
@@ -107,8 +101,7 @@ export const adminApi = {
         }
     },
 
-    //  Get user statistics for dashboard
-
+    // Get user statistics
     getStatistics: async () => {
         try {
             const response = await api.get('/api/admin/statistics');
@@ -118,9 +111,7 @@ export const adminApi = {
         }
     },
 
-
-    //  Bulk update user statuses
-
+    // Bulk update user statuses
     bulkUpdateStatus: async (userIds, status) => {
         try {
             const response = await api.put('/api/admin/users/bulk-status', { userIds, status });
