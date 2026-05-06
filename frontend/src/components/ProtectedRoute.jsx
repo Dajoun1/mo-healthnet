@@ -1,7 +1,12 @@
-﻿﻿import { Navigate } from "react-router-dom";
+﻿﻿﻿import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const normalizeRole = (role) => (role || "").toString().trim().toUpperCase();
+const normalizeRole = (role) => {
+  const value = (role || "").toString().trim();
+  if (!value) return null;
+  // Return capitalized case (e.g., "Admin", "Employee", "Applicant")
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+};
 
 const roleMatches = (userRole, allowedRoles = []) => {
   const normalizedUserRole = normalizeRole(userRole);
@@ -13,10 +18,10 @@ const roleMatches = (userRole, allowedRoles = []) => {
     return true;
   }
 
-  // Treat EMPLOYEE as caseworker-equivalent for dashboard access
+  // Treat Employee as caseworker-equivalent for dashboard access
   if (
-    normalizedUserRole === "EMPLOYEE" &&
-    normalizedAllowedRoles.includes("CASEWORKER")
+    normalizedUserRole === "Employee" &&
+    normalizedAllowedRoles.includes("Caseworker")
   ) {
     return true;
   }
@@ -26,11 +31,11 @@ const roleMatches = (userRole, allowedRoles = []) => {
 
 const getDashboardRouteForRole = (role) => {
   const normalizedRole = normalizeRole(role);
-  if (normalizedRole === "APPLICANT") return "/applicant/dashboard";
-  if (normalizedRole === "EMPLOYEE") {
+  if (normalizedRole === "Applicant") return "/applicant/dashboard";
+  if (normalizedRole === "Employee") {
     return "/caseworker/dashboard";
   }
-  if (normalizedRole === "ADMIN") return "/admin/dashboard";
+  if (normalizedRole === "Admin") return "/admin/dashboard";
   return "/";
 };
 

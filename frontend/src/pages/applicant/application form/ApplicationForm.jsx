@@ -1,4 +1,5 @@
-﻿import { useState, useEffect } from "react";
+﻿﻿import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import ProgressBar from "./ProgressBar";
 import PersonalInfo from "./PersonalInfo";
 import ActivityInfo from "./ActivityInfo";
@@ -13,6 +14,7 @@ const TOTAL_STEPS = 4;
 function ApplicationForm() {
   const [step, setStep] = useState(1);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     firstName: user?.firstName || "",
@@ -32,6 +34,7 @@ function ApplicationForm() {
     { activityType: "", organizationName: "", hoursPerMonth: "" },
   ]);
 
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [errors, setErrors] = useState({});
   const [submitLoading, setSubmitLoading] = useState(false);
   const [touched, setTouched] = useState({});
@@ -77,6 +80,7 @@ function ApplicationForm() {
       householdSize: "",
     });
     setActivities([{ activityType: "", organizationName: "", hoursPerMonth: "" }]);
+    setUploadedFiles([]);
     setErrors({});
     setTouched({});
     setStep(1);
@@ -167,9 +171,54 @@ function ApplicationForm() {
     try {
       const result = await applicationApi.submitApplication(payload);
       if (result.success) {
-        localStorage.setItem("lastApplicationId", result.data.applicationId);
-        alert(`🎉 Application submitted!\n\nApplication ID: ${result.data.applicationId}\nWe'll review and contact you within 48 hours.`);
-        resetForm();
+        const applicationId = result.data.applicationId;
+        localStorage.setItem("lastApplicationId", applicationId);
+
+        // Upload files if any were selected
+        if (uploadedFiles && uploadedFiles.length > 0) {
+          try {
+            const fileFormData = new FormData();
+
+            // Append each file
+            uploadedFiles.forEach((file) => {
+              fileFormData.append("files", file);
+            });
+
+            // Append applicationId
+            fileFormData.append("applicationId", applicationId);
+
+            console.log(`Uploading ${uploadedFiles.length} file(s) for application ${applicationId}`);
+
+            const uploadResponse = await api.post("/api/attachments/upload", fileFormData, {
+              headers: {
+                "Content-Type": "multipart/form-data"
+              },
+            });
+
+            if (uploadResponse.data.success) {
+              console.log(`Successfully uploaded ${uploadedFiles.length} file(s)`);
+            } else {
+              throw new Error(uploadResponse.data.message || "Upload failed");
+            }
+          } catch (uploadError) {
+            console.error("File upload error:", uploadError);
+            console.error("Error details:", uploadError.response?.data || uploadError.message);
+            // Don't fail the submission if file upload fails
+            alert(`⚠️ Application submitted (ID: ${applicationId}), but file upload failed.\n\nError: ${uploadError.response?.data?.message || uploadError.message}\n\nPlease contact support to upload your documents.`);
+            setSubmitLoading(false);
+            return;
+          }
+        }
+
+        // Redirect to My Applications page after successful submission
+        setTimeout(() => {
+          navigate('/applicant/applications', {
+            state: {
+              message: `Application submitted successfully! Application ID: ${applicationId}`,
+              applicationId: applicationId
+            }
+          });
+        }, 500);
       } else {
         alert(`Submission failed: ${result.error}`);
       }
@@ -244,9 +293,16 @@ function ApplicationForm() {
               {step === 2 && (
                 <ActivityInfo activities={activities} onActivitiesChange={setActivities} errors={errors} touched={touched} onBlur={handleBlur} />
               )}
-              {step === 3 && <Documentation />}
+              {step === 3 && <Documentation onFilesChange={setUploadedFiles} />}
               {step === 4 && (
-                <Review formData={formData} activities={activities} onSubmit={handleSubmit} onBack={prevStep} submitLoading={submitLoading} />
+                <Review
+                  formData={formData}
+                  activities={activities}
+                  uploadedFiles={uploadedFiles}
+                  onSubmit={handleSubmit}
+                  onBack={prevStep}
+                  submitLoading={submitLoading}
+                />
               )}
             </div>
 

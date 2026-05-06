@@ -62,10 +62,8 @@ public class AuthenticationService {
             user.setSsnHash(passwordEncoder.encode(ssn));
         }
         user.setPhone(phone);
-        
-        // Default to APPLICANT if role is null
-        user.setRole(role != null ? role : User.UserRole.APPLICANT);
-        user.setStatus(User.UserStatus.ACTIVE);
+        user.setRole(role != null ? role : User.UserRole.Applicant);
+        user.setStatus(User.UserStatus.Active);
         if (phone != null && !phone.isEmpty()) {
             String digitsOnly = phone.replaceAll("\\D", "");
             user.setPhone(digitsOnly.length() > 10 ? digitsOnly.substring(0, 10) : digitsOnly);
@@ -92,12 +90,12 @@ public class AuthenticationService {
 
         User user = userOptional.get();
         
-        if (user.getStatus() == User.UserStatus.LOCKED) {
+        if (user.getStatus() == User.UserStatus.Locked) {
             LOG.warn("Login attempt on locked account: {}", email);
             return false;
         }
         
-        if (user.getStatus() == User.UserStatus.DISABLED) {
+        if (user.getStatus() == User.UserStatus.Disabled) {
             LOG.warn("Login attempt on disabled account: {}", email);
             return false;
         }
@@ -121,7 +119,7 @@ public class AuthenticationService {
     
     public boolean isAdmin(String email) {
         Optional<User> userOptional = userRepository.findByUsername(email);
-        return userOptional.isPresent() && userOptional.get().getRole() == User.UserRole.ADMIN;
+        return userOptional.isPresent() && userOptional.get().getRole() == User.UserRole.Admin;
     }
     
     public User.UserRole getUserRole(String email) {

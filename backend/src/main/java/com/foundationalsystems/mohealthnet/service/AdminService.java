@@ -23,6 +23,9 @@ public class AdminService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public Page<User> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
@@ -51,30 +54,70 @@ public class AdminService {
         return userRepository.findByStatus(status);
     }
 
+    @Transactional
+    public User createUser(String email, String firstName, String lastName,
+                          String middleName, User.UserRole role) {
+        // Validate email doesn't already exist
+        if (userRepository.existsByUsername(email)) {
+            throw new IllegalArgumentException("Email already exists: " + email);
+        }
+
+        // Validate required fields
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        if (firstName == null || firstName.trim().isEmpty()) {
+            throw new IllegalArgumentException("First name is required");
+        }
+        if (lastName == null || lastName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Last name is required");
+        }
+
+        // Create new user
+        User user = new User();
+        user.setUsername(email);
+
+        // Generate a temporary password (can be changed by user later)
+        String tempPassword = "TempPass123!";
+        user.setPasswordHash(passwordEncoder.encode(tempPassword));
+
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setMiddleName(middleName);
+        user.setRole(role != null ? role : User.UserRole.Applicant);
+        user.setStatus(User.UserStatus.Active);
+        user.setProfileComplete(false);
+        user.setCreatedAt(java.time.LocalDateTime.now());
+
+        User savedUser = userRepository.save(user);
+        LOG.info("Admin created new user: {} with role {}", email, role);
+        return savedUser;
+    }
+
     private User.UserRole parseRole(String roleStr) {
         if (roleStr == null) {
             return null;
         }
 
-        // Try case-insensitive matching
-        String upperRole = roleStr.toUpperCase();
+        // Try direct match first (handles capitalized case)
         try {
-            return User.UserRole.valueOf(upperRole);
+            return User.UserRole.valueOf(roleStr);
         } catch (IllegalArgumentException e) {
-            // Handle common variations
+            // Try case-insensitive matching
+            String upperRole = roleStr.toUpperCase();
             switch (upperRole) {
                 case "APPLICANT":
                 case "APPLICANTS":
-                    return User.UserRole.APPLICANT;
+                    return User.UserRole.Applicant;
                 case "EMPLOYEE":
                 case "EMPLOYEES":
-                    return User.UserRole.EMPLOYEE;
+                    return User.UserRole.Employee;
                 case "ADMIN":
                 case "ADMINISTRATOR":
-                    return User.UserRole.ADMIN;
+                    return User.UserRole.Admin;
                 default:
                     throw new IllegalArgumentException(
-                            "Invalid role: " + roleStr + ". Valid roles: APPLICANT, EMPLOYEE, ADMIN");
+                            "Invalid role: " + roleStr + ". Valid roles: Applicant, Employee, Admin");
             }
         }
     }
@@ -119,10 +162,15 @@ public class AdminService {
             throw new IllegalArgumentException("User not found with ID: " + userId);
         }
 
-        // Prevent admin from deleting their own account
+        User user = userOptional.get();
 
-        userRepository.deleteById(userId);
-        LOG.info("User deleted: User ID {}", userId);
+        // Check if user has applications
+        // Instead of hard delete, we'll soft delete by setting status to Disabled
+        // This prevents foreign key constraint issues and maintains data integrity
+        user.setStatus(User.UserStatus.Disabled);
+        userRepository.save(user);
+
+        LOG.info("User soft-deleted (disabled): User ID {}", userId);
     }
 
     @Transactional
@@ -163,12 +211,12 @@ public class AdminService {
     public UserStatistics getUserStatistics() {
         UserStatistics stats = new UserStatistics();
         stats.setTotalUsers(userRepository.count());
-        stats.setActiveUsers(userRepository.countByStatus(User.UserStatus.ACTIVE));
-        stats.setLockedUsers(userRepository.countByStatus(User.UserStatus.LOCKED));
-        stats.setDisabledUsers(userRepository.countByStatus(User.UserStatus.DISABLED));
-        stats.setAdminUsers(userRepository.countByRole(User.UserRole.ADMIN));
-        stats.setEmployeeUsers(userRepository.countByRole(User.UserRole.EMPLOYEE));
-        stats.setApplicantUsers(userRepository.countByRole(User.UserRole.APPLICANT));
+        stats.setActiveUsers(userRepository.countByStatus(User.UserStatus.Active));
+        stats.setLockedUsers(userRepository.countByStatus(User.UserStatus.Locked));
+        stats.setDisabledUsers(userRepository.countByStatus(User.UserStatus.Disabled));
+        stats.setAdminUsers(userRepository.countByRole(User.UserRole.Admin));
+        stats.setEmployeeUsers(userRepository.countByRole(User.UserRole.Employee));
+        stats.setApplicantUsers(userRepository.countByRole(User.UserRole.Applicant));
         return stats;
     }
 

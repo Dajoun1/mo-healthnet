@@ -26,14 +26,12 @@ public class ApplicationController {
     @Autowired
     private ApplicationService applicationService;
 
-    /**
-     * Submit a new application.
-    @Autowired
-    private ApplicationService applicationService;
-
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Submit a new application.
+     */
     @PostMapping("/submit")
     public ResponseEntity<Map<String, Object>> submitApplication(@RequestBody Map<String, Object> payload) {
         Map<String, Object> response = new HashMap<>();

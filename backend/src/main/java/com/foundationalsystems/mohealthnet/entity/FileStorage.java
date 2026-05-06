@@ -20,6 +20,6 @@ public class FileStorage {
     private String fileName;
 
     @Lob
-    @Column(name = "data")
+    @Column(name = "data", columnDefinition = "LONGBLOB")
     private byte[] data;
 }

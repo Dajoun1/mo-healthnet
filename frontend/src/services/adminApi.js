@@ -36,6 +36,16 @@ export const adminApi = {
         }
     },
 
+    // Create new user
+    createUser: async (userData) => {
+        try {
+            const response = await api.post('/api/admin/users', userData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Failed to create user' };
+        }
+    },
+
     // Get users by role with pagination - FIXED
     getUsersByRole: async (role, page = 0, size = 10) => {
         try {

@@ -47,7 +47,8 @@ const Navbar = () => {
   ];
   const authenticatedNavItems = [
     { path: "/applicant/dashboard", label: "Dashboard" },
-    { path: "/applicant/application", label: "My Application" },
+    { path: "/applicant/applications", label: "My Applications" },
+    { path: "/applicant/application", label: "New Application" },
   ];
 //   const notifications = [
 //     {
