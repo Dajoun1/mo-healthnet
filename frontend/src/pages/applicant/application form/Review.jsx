@@ -1,4 +1,4 @@
-﻿const Review = ({ formData, activities, onSubmit, onBack, submitLoading }) => {
+﻿﻿const Review = ({ formData, activities, uploadedFiles, onSubmit, onBack, submitLoading }) => {
   const totalHours = activities.reduce(
     (sum, a) => sum + (Number(a.hoursPerMonth) || 0),
     0
@@ -114,6 +114,38 @@
             {totalHours} hrs{" "}
             {totalHours >= 80 ? "✓ Eligible" : "✗ Below 80"}
           </span>
+        </div>
+      </div>
+
+      {/* Uploaded Files */}
+      <div className="mb-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+          <i className="fas fa-file-alt text-[#0078AE]"></i>
+          Uploaded Documents
+        </h3>
+        <div className="bg-gray-50 rounded-2xl p-4">
+          {uploadedFiles && uploadedFiles.length > 0 ? (
+            <div className="space-y-2">
+              {uploadedFiles.map((file, idx) => (
+                <div
+                  key={idx}
+                  className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0"
+                >
+                  <div className="flex items-center gap-2">
+                    <i className="fas fa-file text-gray-400"></i>
+                    <span className="text-gray-800 text-sm font-medium">{file.name}</span>
+                  </div>
+                  <span className="text-gray-600 text-xs">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm text-center py-2">
+              No documents uploaded
+            </p>
+          )}
         </div>
       </div>
 

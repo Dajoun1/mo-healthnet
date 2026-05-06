@@ -17,6 +17,7 @@ import Signup from "./components/Signup";
 // Protected Pages
 import CaseworkerDashboard from "./pages/caseworker/Dashboard";
 import AdminDashboard from "./pages/admin/Dashboard";
+import ApplicantDashboard from "./pages/applicant/Dashboard";
 import ApplicationForm from "./pages/applicant/application form/ApplicationForm";
 import ActionCards from "./pages/applicant/ActionCards";
 
@@ -43,6 +44,7 @@ function App() {
             }
           >
             <Route path="dashboard" element={<ActionCards />} />
+            <Route path="applications" element={<ApplicantDashboard />} />
             <Route path="application" element={<ApplicationForm />} />
           </Route>
 

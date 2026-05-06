@@ -1,4 +1,4 @@
-﻿import React from "react";
+﻿﻿import React from "react";
 import { Link } from "react-router-dom";
 
 const WorkRequirementDashboard = () => {
@@ -35,7 +35,9 @@ const WorkRequirementDashboard = () => {
                   Recertification required every 6 months.
                 </span>
                 <a
-                  href="#"
+                  href="https://www.chcs.org/resource/a-summary-of-national-medicaid-work-requirements/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-amber-800 underline font-medium ml-1"
                 >
                   View full policy &rarr;
@@ -103,15 +105,14 @@ const WorkRequirementDashboard = () => {
                 Check Status
               </h3>
               <p className="text-gray-600 text-sm mb-4">
-                See if your verification has been approved, denied, or is still
-                under review using your confirmation number.
+                View your submitted applications and check their review status.
               </p>
-              <button
-                disabled
-                className="text-green-400 font-medium text-sm inline-flex items-center gap-1 cursor-not-allowed"
+              <Link
+                to="/applicant/applications"
+                className="text-green-600 font-medium text-sm inline-flex items-center gap-1 hover:text-green-700 transition-colors"
               >
-                Coming soon &rarr;
-              </button>
+                View My Applications &rarr;
+              </Link>
             </div>
           </div>
 

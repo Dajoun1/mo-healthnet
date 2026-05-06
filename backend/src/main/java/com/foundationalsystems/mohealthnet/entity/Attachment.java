@@ -32,16 +32,6 @@ public class Attachment {
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
 
-    // Relationship with FileStorage
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "file_id", insertable = false, updatable = false)
-    private FileStorage fileStorage;
-
-    // Relationship with Application
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "application_id", insertable = false, updatable = false)
-    private Application application;
-
     @PrePersist
     protected void onCreate() {
         if (uploadedAt == null) {
