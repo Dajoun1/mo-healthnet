@@ -1,4 +1,3 @@
-// NoteResponseDTO.java
 package com.foundationalsystems.mohealthnet.dto;
 
 import lombok.Data;
@@ -10,11 +9,11 @@ public class NoteResponseDTO {
     private String title;
     private String content;
     private Integer authorId;
-    private String authorName; // New field
-    private String authorEmail; // New field
+    private String authorName; 
+    private String authorEmail; 
     private Integer targetUserId;
-    private String targetUserName; // New field
-    private String targetUserEmail; // New field
+    private String targetUserName; 
+    private String targetUserEmail; 
     private Boolean isGlobal;
     private String status;
     private LocalDateTime createdAt;

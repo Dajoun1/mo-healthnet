@@ -1,4 +1,3 @@
-// NoteController.java
 package com.foundationalsystems.mohealthnet.controller;
 
 import com.foundationalsystems.mohealthnet.dto.NoteRequestDTO;

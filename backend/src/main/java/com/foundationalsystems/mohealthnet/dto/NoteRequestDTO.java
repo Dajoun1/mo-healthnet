@@ -1,4 +1,4 @@
-// NoteRequestDTO.java
+
 package com.foundationalsystems.mohealthnet.dto;
 
 import lombok.Data;

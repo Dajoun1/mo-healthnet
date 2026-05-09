@@ -1,4 +1,3 @@
-// Note.java
 package com.foundationalsystems.mohealthnet.entity;
 
 import jakarta.persistence.*;
@@ -39,7 +38,6 @@ public class Note {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Add these fields to Note.java if not already present
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NoteStatus status = NoteStatus.ACTIVE;
