@@ -24,7 +24,6 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -42,7 +41,6 @@ const Navbar = () => {
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
   ];
-
   const authenticatedNavItems = [
     { path: "/applicant/dashboard", label: "Dashboard" },
     { path: "/applicant/applications", label: "My Applications" },
@@ -56,12 +54,10 @@ const Navbar = () => {
     setUserDropdownOpen(false);
     navigate("/signin");
   };
-
   const handleSignIn = () => {
     setIsOpen(false);
     navigate("/signin");
   };
-
   const handleSignUp = () => {
     setIsOpen(false);
     navigate("/signup");
@@ -184,7 +180,6 @@ const Navbar = () => {
               </div>
             )}
           </div>
-
           {/* Mobile menu button */}
           <button
             onClick={toggleMenu}
@@ -271,5 +266,4 @@ const Navbar = () => {
     </nav>
   );
 };
-
 export default Navbar;

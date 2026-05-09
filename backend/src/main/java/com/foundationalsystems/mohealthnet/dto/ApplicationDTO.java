@@ -31,6 +31,10 @@ public class ApplicationDTO {
     public void setActivityType(String applicationSubmitted) {
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5af4e21a812f8dd621bbb1885dc3f5ac628ca1e3
     public static class ActivityDTO {
         private Integer id;
         private String activityType;
@@ -105,6 +109,7 @@ public class ApplicationDTO {
     }
 
     // Getters
+<<<<<<< HEAD
     public Integer getId() {
         return id;
     }
@@ -180,6 +185,27 @@ public class ApplicationDTO {
     public List<ActivityDTO> getActivities() {
         return activities;
     }
+=======
+    public Integer getId() { return id; }
+    public Integer getUserId() { return userId; }
+    public String getApplicantFirstName() { return applicantFirstName; }
+    public String getApplicantLastName() { return applicantLastName; }
+    public String getApplicantFullName() { return applicantFullName; }
+    public Integer getHouseholdSize() { return householdSize; }
+    public String getPhone() { return phone; }
+    public String getStreetAddress() { return streetAddress; }
+    public String getCity() { return city; }
+    public String getState() { return state; }
+    public String getZipCode() { return zipCode; }
+    public Boolean getIsMissouriResident() { return isMissouriResident; }
+    public Integer getTotalHoursPerMonth() { return totalHoursPerMonth; }
+    public String getStatus() { return status; }
+    public LocalDateTime getSubmittedAt() { return submittedAt; }
+    public Integer getReviewedBy() { return reviewedBy; }
+    public LocalDateTime getReviewedAt() { return reviewedAt; }
+    public String getReviewNotes() { return reviewNotes; }
+    public List<ActivityDTO> getActivities() { return activities; }
+>>>>>>> 5af4e21a812f8dd621bbb1885dc3f5ac628ca1e3
 
     // Setters for applicant info (populated separately)
     public void setApplicantFirstName(String applicantFirstName) {
@@ -258,3 +284,10 @@ public class ApplicationDTO {
         this.activities = activities;
     }
 }
+<<<<<<< HEAD
+=======
+
+
+
+
+>>>>>>> 5af4e21a812f8dd621bbb1885dc3f5ac628ca1e3

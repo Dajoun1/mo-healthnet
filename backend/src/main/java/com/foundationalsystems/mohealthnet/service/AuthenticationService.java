@@ -62,7 +62,11 @@ public class AuthenticationService {
             user.setSsnHash(passwordEncoder.encode(ssn));
         }
         user.setPhone(phone);
+<<<<<<< HEAD
         user.setRole(role != null ? role : User.UserRole.APPLICANT);
+=======
+        user.setRole(role != null ? role : User.UserRole.Applicant);
+>>>>>>> 5af4e21a812f8dd621bbb1885dc3f5ac628ca1e3
         user.setStatus(User.UserStatus.Active);
         if (phone != null && !phone.isEmpty()) {
             String digitsOnly = phone.replaceAll("\\D", "");
