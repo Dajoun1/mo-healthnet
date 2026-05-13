@@ -84,11 +84,8 @@ public class AdminService {
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setMiddleName(middleName);
-<<<<<<< HEAD
-        user.setRole(role != null ? role : User.UserRole.APPLICANT);
-=======
         user.setRole(role != null ? role : User.UserRole.Applicant);
->>>>>>> 5af4e21a812f8dd621bbb1885dc3f5ac628ca1e3
+
         user.setStatus(User.UserStatus.Active);
         user.setProfileComplete(false);
         user.setCreatedAt(java.time.LocalDateTime.now());
@@ -112,15 +109,6 @@ public class AdminService {
             switch (upperRole) {
                 case "APPLICANT":
                 case "APPLICANTS":
-<<<<<<< HEAD
-                    return User.UserRole.APPLICANT;
-                case "EMPLOYEE":
-                case "EMPLOYEES":
-                    return User.UserRole.EMPLOYEE;
-                case "ADMIN":
-                case "ADMINISTRATOR":
-                    return User.UserRole.ADMIN;
-=======
                     return User.UserRole.Applicant;
                 case "EMPLOYEE":
                 case "EMPLOYEES":
@@ -128,7 +116,6 @@ public class AdminService {
                 case "ADMIN":
                 case "ADMINISTRATOR":
                     return User.UserRole.Admin;
->>>>>>> 5af4e21a812f8dd621bbb1885dc3f5ac628ca1e3
                 default:
                     throw new IllegalArgumentException(
                             "Invalid role: " + roleStr + ". Valid roles: Applicant, Employee, Admin");
@@ -228,9 +215,9 @@ public class AdminService {
         stats.setActiveUsers(userRepository.countByStatus(User.UserStatus.Active));
         stats.setLockedUsers(userRepository.countByStatus(User.UserStatus.Locked));
         stats.setDisabledUsers(userRepository.countByStatus(User.UserStatus.Disabled));
-        stats.setAdminUsers(userRepository.countByRole(User.UserRole.ADMIN));
-        stats.setEmployeeUsers(userRepository.countByRole(User.UserRole.EMPLOYEE));
-        stats.setApplicantUsers(userRepository.countByRole(User.UserRole.APPLICANT));
+        stats.setAdminUsers(userRepository.countByRole(User.UserRole.Admin));
+        stats.setEmployeeUsers(userRepository.countByRole(User.UserRole.Employee));
+        stats.setApplicantUsers(userRepository.countByRole(User.UserRole.Applicant));
         return stats;
     }
 

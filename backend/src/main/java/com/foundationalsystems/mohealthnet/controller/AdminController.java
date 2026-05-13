@@ -136,7 +136,7 @@ public class AdminController {
             }
 
             // Parse role
-            User.UserRole role = User.UserRole.APPLICANT; // Default
+            User.UserRole role = User.UserRole.Applicant; // Default
             if (roleStr != null && !roleStr.trim().isEmpty()) {
                 try {
                     role = User.UserRole.valueOf(roleStr);

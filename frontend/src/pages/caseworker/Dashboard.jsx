@@ -32,6 +32,7 @@ const CaseworkerDashboard = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [reviewNotes, setReviewNotes] = useState("");
   const [updating, setUpdating] = useState(false);
+  const [assigning, setAssigning] = useState(false);
   const [attachments, setAttachments] = useState([]);
   const [loadingAttachments, setLoadingAttachments] = useState(false);
 
@@ -138,6 +139,48 @@ const CaseworkerDashboard = () => {
       alert(err.message || "Failed to update application status");
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleAssignToMe = async () => {
+    if (!selectedApp || !user) return;
+
+    setAssigning(true);
+    try {
+      await caseworkerApi.assignApplication(selectedApp.id, user.id);
+      await fetchApplications();
+      // Update the selectedApp to reflect the change
+      setSelectedApp(prev => ({
+        ...prev,
+        assignedTo: user.id,
+        assignedToName: `${user.firstName} ${user.lastName}`
+      }));
+    } catch (err) {
+      console.error("Error assigning application:", err);
+      alert(err.message || "Failed to assign application");
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleUnassign = async () => {
+    if (!selectedApp) return;
+
+    setAssigning(true);
+    try {
+      await caseworkerApi.assignApplication(selectedApp.id, null);
+      await fetchApplications();
+      // Update the selectedApp to reflect the change
+      setSelectedApp(prev => ({
+        ...prev,
+        assignedTo: null,
+        assignedToName: null
+      }));
+    } catch (err) {
+      console.error("Error unassigning application:", err);
+      alert(err.message || "Failed to unassign application");
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -266,6 +309,7 @@ const CaseworkerDashboard = () => {
                 <th className="px-6 py-3">Submitted</th>
                 <th className="px-6 py-3">Household</th>
                 <th className="px-6 py-3">Hours/Month</th>
+                <th className="px-6 py-3">Assigned To</th>
                 <th className="px-6 py-3">Status</th>
                 <th className="px-6 py-3 text-right">Actions</th>
               </tr>
@@ -273,7 +317,7 @@ const CaseworkerDashboard = () => {
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center">
+                  <td colSpan={8} className="px-6 py-10 text-center">
                     <div className="flex justify-center">
                       <div className="w-8 h-8 border-4 border-[#0078AE] border-t-transparent rounded-full animate-spin"></div>
                     </div>
@@ -282,7 +326,7 @@ const CaseworkerDashboard = () => {
               ) : filteredApplications.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     className="px-6 py-10 text-center text-gray-400"
                   >
                     No applications found
@@ -311,6 +355,15 @@ const CaseworkerDashboard = () => {
                     </td>
                     <td className="px-6 py-4 font-medium text-gray-800">
                       {app.totalHoursPerMonth}h
+                    </td>
+                    <td className="px-6 py-4">
+                      {app.assignedToName ? (
+                        <span className="text-gray-800 font-medium">
+                          {app.assignedToName}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 italic text-sm">Unassigned</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <span
@@ -345,9 +398,42 @@ const CaseworkerDashboard = () => {
               <h2 className="text-2xl font-bold text-gray-800 mb-1">
                 Application #{selectedApp.id}
               </h2>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-gray-600 mb-2">
                 Applicant: {selectedApp.applicantFullName || `User #${selectedApp.userId}`}
               </p>
+
+              {/* Assignment Status */}
+              <div className="mb-4 flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Assigned to:</span>
+                  {selectedApp.assignedToName ? (
+                    <span className="font-semibold text-gray-800">{selectedApp.assignedToName}</span>
+                  ) : (
+                    <span className="text-gray-400 italic">Unassigned</span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  {selectedApp.assignedTo === user?.id ? (
+                    <button
+                      onClick={handleUnassign}
+                      disabled={assigning}
+                      className="px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {assigning ? "Unassigning..." : "Unassign Me"}
+                    </button>
+                  ) : !selectedApp.assignedTo ? (
+                    <button
+                      onClick={handleAssignToMe}
+                      disabled={assigning}
+                      className="px-3 py-1.5 text-sm bg-[#0078AE] text-white rounded-lg hover:bg-[#005f8a] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {assigning ? "Assigning..." : "Assign to Me"}
+                    </button>
+                  ) : (
+                    <span className="text-xs text-gray-500 italic">Assigned to another caseworker</span>
+                  )}
+                </div>
+              </div>
 
               {/* Application Details */}
               <div className="space-y-4 mb-6">

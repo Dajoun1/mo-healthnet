@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import {
   PencilSquareIcon,
-  TrashIcon,
+  XMarkIcon,
   LockOpenIcon,
   LockClosedIcon,
   PlusIcon,
-  XMarkIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { adminApi } from "../../services/adminApi";
@@ -298,8 +297,8 @@ const AdminDashboard = () => {
       }
       await fetchStats();
     } catch (err) {
-      setError(err.message || "Failed to delete user");
-      console.error("Error deleting user:", err);
+      setError(err.message || "Failed to disable user");
+      console.error("Error disabling user:", err);
     } finally {
       setLoading(false);
     }
@@ -629,10 +628,15 @@ const AdminDashboard = () => {
                         </button>
                         <button
                           onClick={() => confirmDelete(user.id)}
-                          title="Delete user"
-                          className="p-1.5 rounded-md text-red-500 hover:bg-red-50 transition-colors"
+                          title="Disable user"
+                          disabled={user.status === "Disabled"}
+                          className={`p-1.5 rounded-md transition-colors ${
+                            user.status === "Disabled"
+                              ? "text-gray-300 cursor-not-allowed"
+                              : "text-red-500 hover:bg-red-50"
+                          }`}
                         >
-                          <TrashIcon className="w-4 h-4" />
+                          <XMarkIcon className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -849,9 +853,9 @@ const AdminDashboard = () => {
               <button
                 onClick={handleDelete}
                 disabled={loading}
-                className="px-4 py-2 text-sm rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-medium transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? "Disabling..." : "Disable User"}
+                {loading ? "Disabling..." : "Disable"}
               </button>
             </div>
           </div>

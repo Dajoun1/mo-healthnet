@@ -1,4 +1,6 @@
-﻿const PersonalInfo = ({ formData, onChange, onBlur, errors, touched }) => {
+﻿import { Link } from "react-router-dom";
+
+const PersonalInfo = ({ formData, onChange, onBlur, errors, touched }) => {
   const inputClass = (fieldName) => `
     w-full px-5 py-3.5 rounded-2xl border-2 bg-white/50 backdrop-blur-sm transition-all duration-200
     ${errors[fieldName] && touched[fieldName]
@@ -32,7 +34,9 @@
         </h3>
         <p className="text-sm text-gray-400 mb-4">
           Pre-filled from your account.{" "}
-          <span className="text-[#0078AE]">Contact support to update.</span>
+          <Link to="/applicant/support" className="text-[#0078AE] hover:underline">
+            Contact support to update.
+          </Link>
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

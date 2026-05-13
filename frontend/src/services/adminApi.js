@@ -91,13 +91,13 @@ export const adminApi = {
         }
     },
 
-    // Delete user
+    // Disable user (soft delete - sets status to Disabled)
     deleteUser: async (userId) => {
         try {
             const response = await api.delete(`/api/admin/users/${userId}`);
             return response.data;
         } catch (error) {
-            throw error.response?.data || { message: 'Failed to delete user' };
+            throw error.response?.data || { message: 'Failed to disable user' };
         }
     },
 

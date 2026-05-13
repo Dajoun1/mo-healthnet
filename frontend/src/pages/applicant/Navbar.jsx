@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+﻿﻿import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   Bars3Icon,
@@ -10,11 +10,13 @@ import {
 } from "@heroicons/react/24/outline";
 import logo from "../../assets/icons/mohealthnet1.png";
 import { useAuth } from "../../context/AuthContext";
+import { noteApi } from "../../services/noteApi";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const { isAuthenticated, logout, user } = useAuth();
@@ -24,6 +26,7 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -33,6 +36,46 @@ const Navbar = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Fetch unread notification count
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      fetchUnreadCount();
+      // Poll every 30 seconds for new notifications
+      const interval = setInterval(fetchUnreadCount, 30000);
+
+      // Refresh count when window regains focus
+      const handleFocus = () => fetchUnreadCount();
+      window.addEventListener('focus', handleFocus);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('focus', handleFocus);
+      };
+    }
+  }, [isAuthenticated, user?.id]);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await noteApi.getMyNotesAsApplicant(user?.id);
+      const notesData = response.content || response;
+      const notes = Array.isArray(notesData) ? notesData : [];
+
+      // Get last viewed timestamp from localStorage
+      const lastViewed = localStorage.getItem(`notifications_last_viewed_${user?.id}`);
+      const lastViewedTime = lastViewed ? new Date(lastViewed) : new Date(0);
+
+      // Count notes that are newer than last viewed time
+      const unread = notes.filter(note => {
+        const noteTime = new Date(note.createdAt);
+        return noteTime > lastViewedTime;
+      }).length;
+
+      setUnreadCount(unread);
+    } catch (error) {
+      console.error("Failed to fetch notification count:", error);
+    }
+  };
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleUserDropdown = () => setUserDropdownOpen(!userDropdownOpen);
@@ -45,7 +88,8 @@ const Navbar = () => {
     { path: "/applicant/dashboard", label: "Dashboard" },
     { path: "/applicant/applications", label: "My Applications" },
     { path: "/applicant/application", label: "New Application" },
-    { path: "/applicant/notes", label: "Notifications" },
+    { path: "/applicant/about", label: "About" },
+    { path: "/applicant/support", label: "Support" },
   ];
 
   const handleSignOut = () => {
@@ -64,6 +108,10 @@ const Navbar = () => {
   };
 
   const handleNotificationsClick = () => {
+    // Mark notifications as viewed with current timestamp
+    localStorage.setItem(`notifications_last_viewed_${user?.id}`, new Date().toISOString());
+    // Clear the badge immediately
+    setUnreadCount(0);
     navigate("/applicant/notes");
   };
 
@@ -124,6 +172,11 @@ const Navbar = () => {
                 title="Notifications"
               >
                 <BellIcon className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full min-w-[1.25rem]">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </button>
             )}
 
@@ -207,14 +260,32 @@ const Navbar = () => {
         <div className="bg-white shadow-lg">
           {isAuthenticated && (
             <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <UserCircleIcon className="w-12 h-12 text-[#0078AE]" />
-                <div>
-                  <p className="font-semibold text-gray-900">{displayName}</p>
-                  <p className="text-xs text-gray-500">
-                    {user?.username || ""}
-                  </p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <UserCircleIcon className="w-12 h-12 text-[#0078AE]" />
+                  <div>
+                    <p className="font-semibold text-gray-900">{displayName}</p>
+                    <p className="text-xs text-gray-500">
+                      {user?.username || ""}
+                    </p>
+                  </div>
                 </div>
+                {/* Notification Bell for Mobile */}
+                <button
+                  onClick={() => {
+                    handleNotificationsClick();
+                    toggleMenu();
+                  }}
+                  className="relative p-2 text-[#0078AE] transition-colors rounded-lg hover:bg-[#0078AE]/10"
+                  title="Notifications"
+                >
+                  <BellIcon className="w-6 h-6" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full min-w-[1.25rem]">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
           )}
@@ -229,7 +300,6 @@ const Navbar = () => {
                   ${isActive ? "text-[#0078AE] bg-[#0078AE]/5" : "text-gray-700 hover:text-[#0078AE] hover:bg-gray-50"}`
                 }
               >
-                <BellIcon className="w-5 h-5" />
                 {item.label}
               </NavLink>
             ))}

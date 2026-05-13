@@ -26,7 +26,7 @@ public class NoteService {
                 .orElseThrow(() -> new RuntimeException("Author not found"));
         
         // Verify author is employee or admin
-        if (author.getRole() != User.UserRole.EMPLOYEE && author.getRole() != User.UserRole.ADMIN) {
+        if (author.getRole() != User.UserRole.Employee && author.getRole() != User.UserRole.Admin) {
             throw new RuntimeException("Only employees and admins can create notes");
         }
         
@@ -46,7 +46,7 @@ public class NoteService {
                         .orElseThrow(() -> new RuntimeException("Applicant not found with email: " + request.getTargetUserEmail()));
                 
                 // Verify target is an applicant
-                if (targetUser.getRole() != User.UserRole.APPLICANT) {
+                if (targetUser.getRole() != User.UserRole.Applicant) {
                     throw new RuntimeException("Notes can only be sent to applicants");
                 }
                 targetId = targetUser.getId();
@@ -87,7 +87,7 @@ public class NoteService {
             User targetUser = userRepository.findByUsername(request.getTargetUserEmail())
                     .orElseThrow(() -> new RuntimeException("Applicant not found with email: " + request.getTargetUserEmail()));
             
-            if (targetUser.getRole() != User.UserRole.APPLICANT) {
+            if (targetUser.getRole() != User.UserRole.Applicant) {
                 throw new RuntimeException("Notes can only be sent to applicants");
             }
             note.setTargetUserId(targetUser.getId());

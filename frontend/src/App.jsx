@@ -17,11 +17,14 @@ import Signup from "./components/Signup";
 // Protected Pages
 import CaseworkerDashboard from "./pages/caseworker/Dashboard";
 import NotesManagement from "./pages/caseworker/NotesManagement";
+import CaseworkerSupport from "./pages/caseworker/Support";
 import AdminDashboard from "./pages/admin/Dashboard";
+import AdminSupport from "./pages/admin/Support";
 import ApplicantDashboard from "./pages/applicant/Dashboard";
 import Notes from "./pages/applicant/Notes";
 import ApplicationForm from "./pages/applicant/application form/ApplicationForm";
 import ActionCards from "./pages/applicant/ActionCards";
+import Support from "./pages/applicant/Support";
 
 function App() {
   return (
@@ -49,6 +52,8 @@ function App() {
             <Route path="applications" element={<ApplicantDashboard />} />
             <Route path="application" element={<ApplicationForm />} />
             <Route path="notes" element={<Notes />} />
+            <Route path="support" element={<Support />} />
+            <Route path="about" element={<About />} />
           </Route>
 
           {/* Protected Caseworker Routes */}
@@ -62,6 +67,7 @@ function App() {
           >
             <Route path="dashboard" element={<CaseworkerDashboard />} />
             <Route path="notes" element={<NotesManagement />} />
+            <Route path="support" element={<CaseworkerSupport />} />
           </Route>
 
           {/* Protected Admin Routes */}
@@ -74,6 +80,7 @@ function App() {
             }
           >
             <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="support" element={<AdminSupport />} />
           </Route>
         </Routes>
       </AuthProvider>

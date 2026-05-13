@@ -89,7 +89,7 @@ public class NoteController {
         User requester = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
-        if (requester.getRole() != User.UserRole.EMPLOYEE && requester.getRole() != User.UserRole.ADMIN) {
+        if (requester.getRole() != User.UserRole.Employee && requester.getRole() != User.UserRole.Admin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized");
         }
         
@@ -101,7 +101,7 @@ public class NoteController {
                     .body(new ValidationResponse(false, "No user found with this email"));
         }
         
-        if (applicant.getRole() != User.UserRole.APPLICANT) {
+        if (applicant.getRole() != User.UserRole.Applicant) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ValidationResponse(false, "User is not an applicant"));
         }

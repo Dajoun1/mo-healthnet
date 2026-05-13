@@ -20,7 +20,11 @@ const Notes = () => {
 
   useEffect(() => {
     fetchNotes();
-  }, []);
+    // Mark all notifications as viewed when this page loads
+    if (user?.id) {
+      localStorage.setItem(`notifications_last_viewed_${user.id}`, new Date().toISOString());
+    }
+  }, [user?.id]);
 
   const fetchNotes = async () => {
     setLoading(true);
@@ -133,7 +137,7 @@ const Notes = () => {
                             <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
                               <span className="flex items-center gap-1">
                                 <UserCircleIcon className="w-4 h-4" />
-                                {note.author?.firstName} {note.author?.lastName}
+                                From: {note.authorName || "System"}
                               </span>
                               <span className="flex items-center gap-1">
                                 <CalendarIcon className="w-4 h-4" />
@@ -181,7 +185,7 @@ const Notes = () => {
                     {selectedNote.title}
                   </h2>
                   <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                    <span>From: {selectedNote.author?.firstName} {selectedNote.author?.lastName}</span>
+                    <span>From: {selectedNote.authorName || "System"}</span>
                     <span>•</span>
                     <span>{formatDate(selectedNote.createdAt)}</span>
                   </div>

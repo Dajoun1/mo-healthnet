@@ -79,9 +79,9 @@ public class User {
     }
 
     public enum UserRole {
-        APPLICANT,
-        EMPLOYEE,
-        ADMIN
+        Applicant,
+        Employee,
+        Admin
     }
 
     public enum UserStatus {
