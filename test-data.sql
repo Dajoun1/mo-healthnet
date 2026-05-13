@@ -46,22 +46,5 @@ VALUES
   -- Username: christopher.lee@test.com, Password: caseworker123
   ('christopher.lee@test.com', '$2a$10$TNYeCGntmMr8SJIJsD60Du4oIoQ36C/Ch/4v7ETWeLgoXpQ4dzzqq', 'Christopher', 'Michael', 'Lee', '1989-10-17', '$2a$10$TNYeCGntmMr8SJIJsD60Du4oIoQ36C/Ch/4v7ETWeLgoXpQ4dzzqq', '5551235678', '789 Services Blvd', 'Columbia', 'MO', '65203', 'Employee', 'Active', TRUE, NOW(), NOW());
 
--- To use this:
--- 1. Start your backend application (it will create the tables automatically)
--- 2. Execute this SQL in MySQL Workbench
---
--- Test Data Summary:
--- - 1 Admin user
--- - 6 Applicant users (5 Active, 1 Suspended)
--- - 4 Employee users (caseworkers, all Active)
---
--- Notes:
--- - SSN stored as BCrypt hash in ssn_hash (VARCHAR(255))
--- - Roles must match enum: Applicant, Employee, Admin (case-sensitive, capitalized)
--- - Status values: Active, Inactive, Pending, Suspended (case-sensitive, capitalized)
--- - Passwords: applicant123 (for applicants), admin123 (for admin), caseworker123 (for employees)
--- - Hashes use BCrypt for security
--- - All addresses are in Missouri (MO) with various cities
 
-
-
+-- Execute this SQL in MySQL Workbench
