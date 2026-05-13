@@ -1,4 +1,3 @@
-// UserSummary.java
 package com.foundationalsystems.mohealthnet.dto;
 
 import com.foundationalsystems.mohealthnet.entity.User;

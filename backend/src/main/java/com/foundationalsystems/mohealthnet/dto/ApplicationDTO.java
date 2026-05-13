@@ -24,13 +24,14 @@ public class ApplicationDTO {
     private String status;
     private LocalDateTime submittedAt;
     private Integer reviewedBy;
+    private Integer assignedTo;
+    private String assignedToName;
     private LocalDateTime reviewedAt;
     private String reviewNotes;
     private List<ActivityDTO> activities;
 
     public void setActivityType(String applicationSubmitted) {
     }
-
 
     public static class ActivityDTO {
         private Integer id;
@@ -45,11 +46,43 @@ public class ApplicationDTO {
             this.hoursPerMonth = activity.getHoursPerMonth();
         }
 
+        // Add no-argument constructor if needed for testing
+        public ActivityDTO() {
+        }
+
         // Getters
-        public Integer getId() { return id; }
-        public String getActivityType() { return activityType; }
-        public String getOrganizationName() { return organizationName; }
-        public Integer getHoursPerMonth() { return hoursPerMonth; }
+        public Integer getId() {
+            return id;
+        }
+
+        public String getActivityType() {
+            return activityType;
+        }
+
+        public String getOrganizationName() {
+            return organizationName;
+        }
+
+        public Integer getHoursPerMonth() {
+            return hoursPerMonth;
+        }
+
+        // Add setters for testing
+        public void setId(Integer id) {
+            this.id = id;
+        }
+
+        public void setActivityType(String activityType) {
+            this.activityType = activityType;
+        }
+
+        public void setOrganizationName(String organizationName) {
+            this.organizationName = organizationName;
+        }
+
+        public void setHoursPerMonth(Integer hoursPerMonth) {
+            this.hoursPerMonth = hoursPerMonth;
+        }
     }
 
     public ApplicationDTO(Application app) {
@@ -66,6 +99,7 @@ public class ApplicationDTO {
         this.status = app.getStatus().name();
         this.submittedAt = app.getSubmittedAt();
         this.reviewedBy = app.getReviewedBy();
+        this.assignedTo = app.getAssignedTo();
         this.reviewedAt = app.getReviewedAt();
         this.reviewNotes = app.getReviewNotes();
         this.activities = app.getActivities().stream()
@@ -74,27 +108,91 @@ public class ApplicationDTO {
     }
 
     // Getters
-    public Integer getId() { return id; }
-    public Integer getUserId() { return userId; }
-    public String getApplicantFirstName() { return applicantFirstName; }
-    public String getApplicantLastName() { return applicantLastName; }
-    public String getApplicantFullName() { return applicantFullName; }
-    public Integer getHouseholdSize() { return householdSize; }
-    public String getPhone() { return phone; }
-    public String getStreetAddress() { return streetAddress; }
-    public String getCity() { return city; }
-    public String getState() { return state; }
-    public String getZipCode() { return zipCode; }
-    public Boolean getIsMissouriResident() { return isMissouriResident; }
-    public Integer getTotalHoursPerMonth() { return totalHoursPerMonth; }
-    public String getStatus() { return status; }
-    public LocalDateTime getSubmittedAt() { return submittedAt; }
-    public Integer getReviewedBy() { return reviewedBy; }
-    public LocalDateTime getReviewedAt() { return reviewedAt; }
-    public String getReviewNotes() { return reviewNotes; }
-    public List<ActivityDTO> getActivities() { return activities; }
+    public Integer getId() {
+        return id;
+    }
 
-    // Setters for applicant info (populated separately)
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public String getApplicantFirstName() {
+        return applicantFirstName;
+    }
+
+    public String getApplicantLastName() {
+        return applicantLastName;
+    }
+
+    public String getApplicantFullName() {
+        return applicantFullName;
+    }
+
+    public Integer getHouseholdSize() {
+        return householdSize;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getStreetAddress() {
+        return streetAddress;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    public Boolean getIsMissouriResident() {
+        return isMissouriResident;
+    }
+
+    public Integer getTotalHoursPerMonth() {
+        return totalHoursPerMonth;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public Integer getReviewedBy() {
+        return reviewedBy;
+    }
+
+    public Integer getAssignedTo() {
+        return assignedTo;
+    }
+
+    public String getAssignedToName() {
+        return assignedToName;
+    }
+
+    public LocalDateTime getReviewedAt() {
+        return reviewedAt;
+    }
+
+    public String getReviewNotes() {
+        return reviewNotes;
+    }
+
+    public List<ActivityDTO> getActivities() {
+        return activities;
+    }
+
+    // Setters
     public void setApplicantFirstName(String applicantFirstName) {
         this.applicantFirstName = applicantFirstName;
     }
@@ -107,71 +205,7 @@ public class ApplicationDTO {
         this.applicantFullName = applicantFullName;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public void setHouseholdSize(Integer householdSize) {
-        this.householdSize = householdSize;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public void setStreetAddress(String streetAddress) {
-        this.streetAddress = streetAddress;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public void setZipCode(String zipCode) {
-        this.zipCode = zipCode;
-    }
-
-    public void setMissouriResident(Boolean missouriResident) {
-        isMissouriResident = missouriResident;
-    }
-
-    public void setTotalHoursPerMonth(Integer totalHoursPerMonth) {
-        this.totalHoursPerMonth = totalHoursPerMonth;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setSubmittedAt(LocalDateTime submittedAt) {
-        this.submittedAt = submittedAt;
-    }
-
-    public void setReviewedBy(Integer reviewedBy) {
-        this.reviewedBy = reviewedBy;
-    }
-
-    public void setReviewedAt(LocalDateTime reviewedAt) {
-        this.reviewedAt = reviewedAt;
-    }
-
-    public void setReviewNotes(String reviewNotes) {
-        this.reviewNotes = reviewNotes;
-    }
-
-    public void setActivities(List<ActivityDTO> activities) {
-        this.activities = activities;
+    public void setAssignedToName(String assignedToName) {
+        this.assignedToName = assignedToName;
     }
 }
-
-
-
-

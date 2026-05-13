@@ -1,46 +1,85 @@
-﻿import { useState, useEffect, useRef } from "react";
+﻿﻿import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   Bars3Icon,
   XMarkIcon,
   UserCircleIcon,
   ChevronDownIcon,
-  // BellIcon,       // commented out until notifications are implemented
+  BellIcon,
   ArrowRightOnRectangleIcon,
-  // ClockIcon,      // commented out until notifications are implemented
-  // CheckBadgeIcon, // commented out until notifications are implemented
 } from "@heroicons/react/24/outline";
 import logo from "../../assets/icons/mohealthnet1.png";
 import { useAuth } from "../../context/AuthContext";
+import { noteApi } from "../../services/noteApi";
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false); // eslint-disable-line no-unused-vars
   const [scrolled, setScrolled] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef(null);
-  const notificationRef = useRef(null); // reserved for future use
   const navigate = useNavigate();
   const { isAuthenticated, logout, user } = useAuth();
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setUserDropdownOpen(false);
       }
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-        setNotificationsOpen(false);
-      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Fetch unread notification count
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      fetchUnreadCount();
+      // Poll every 30 seconds for new notifications
+      const interval = setInterval(fetchUnreadCount, 30000);
+
+      // Refresh count when window regains focus
+      const handleFocus = () => fetchUnreadCount();
+      window.addEventListener('focus', handleFocus);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('focus', handleFocus);
+      };
+    }
+  }, [isAuthenticated, user?.id]);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await noteApi.getMyNotesAsApplicant(user?.id);
+      const notesData = response.content || response;
+      const notes = Array.isArray(notesData) ? notesData : [];
+
+      // Get last viewed timestamp from localStorage
+      const lastViewed = localStorage.getItem(`notifications_last_viewed_${user?.id}`);
+      const lastViewedTime = lastViewed ? new Date(lastViewed) : new Date(0);
+
+      // Count notes that are newer than last viewed time
+      const unread = notes.filter(note => {
+        const noteTime = new Date(note.createdAt);
+        return noteTime > lastViewedTime;
+      }).length;
+
+      setUnreadCount(unread);
+    } catch (error) {
+      console.error("Failed to fetch notification count:", error);
+    }
+  };
+
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleUserDropdown = () => setUserDropdownOpen(!userDropdownOpen);
-  // const toggleNotifications = () => setNotificationsOpen(!notificationsOpen); // reserved for future use
+
   const publicNavItems = [
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
@@ -49,27 +88,10 @@ const Navbar = () => {
     { path: "/applicant/dashboard", label: "Dashboard" },
     { path: "/applicant/applications", label: "My Applications" },
     { path: "/applicant/application", label: "New Application" },
+    { path: "/applicant/about", label: "About" },
+    { path: "/applicant/support", label: "Support" },
   ];
-//   const notifications = [
-//     {
-//       id: 1,
-//       title: "Verification Due Soon",
-//       message: "Your 6-month recertification is due in 15 days",
-//       time: "2 hours ago",
-//       unread: true,
-//       icon: ClockIcon,
-//     },
-//     {
-//       id: 2,
-//       title: "Application Approved",
-//       message: "Your recent submission has been approved",
-//       time: "1 day ago",
-//       unread: false,
-//       icon: CheckBadgeIcon,
-//     },
-//   ];
 
-//   const unreadCount = notifications.filter((n) => n.unread).length;
   const handleSignOut = () => {
     logout();
     setIsOpen(false);
@@ -84,13 +106,22 @@ const Navbar = () => {
     setIsOpen(false);
     navigate("/signup");
   };
-  const navItemsToShow = isAuthenticated ? authenticatedNavItems : publicNavItems;
+
+  const handleNotificationsClick = () => {
+    // Mark notifications as viewed with current timestamp
+    localStorage.setItem(`notifications_last_viewed_${user?.id}`, new Date().toISOString());
+    // Clear the badge immediately
+    setUnreadCount(0);
+    navigate("/applicant/notes");
+  };
+
+  const navItemsToShow = isAuthenticated
+    ? authenticatedNavItems
+    : publicNavItems;
   const displayName = user?.firstName
     ? `${user.firstName} ${user.lastName || ""}`.trim()
     : "Member";
 
-
-    
   return (
     <nav
       className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
@@ -111,8 +142,12 @@ const Navbar = () => {
               data-testid="logo"
             />
           </Link>
+
           {/* Desktop Nav Links */}
-          <div className="hidden items-center space-x-1 lg:flex" data-testid="desktop-menu">
+          <div
+            className="hidden items-center space-x-1 lg:flex"
+            data-testid="desktop-menu"
+          >
             {navItemsToShow.map((item) => (
               <NavLink
                 key={item.path}
@@ -126,54 +161,25 @@ const Navbar = () => {
               </NavLink>
             ))}
           </div>
+
           {/* Desktop Right Side */}
           <div className="hidden items-center space-x-3 lg:flex">
-            {/* Notifications - commented out until implemented
+            {/* Notification Bell */}
             {isAuthenticated && (
-              <div className="relative" ref={notificationRef}>
-                <button
-                  onClick={toggleNotifications}
-                  className="relative p-2 text-white transition-colors rounded-lg hover:bg-white/10"
-                >
-                  <BellIcon className="w-5 h-5" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-0 right-0 flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
-                      {unreadCount}
-                    </span>
-                  )}
-                </button>
-                {notificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-50">
-                    <div className="p-3 border-b border-gray-100">
-                      <h3 className="font-semibold text-gray-900">Notifications</h3>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto">
-                      {notifications.map((notif) => (
-                        <div
-                          key={notif.id}
-                          className={`p-3 hover:bg-gray-50 cursor-pointer transition-colors ${notif.unread ? "bg-[#0078AE]/5" : ""}`}
-                        >
-                          <div className="flex gap-3">
-                            <notif.icon className="w-5 h-5 text-[#0078AE] flex-shrink-0" />
-                            <div className="flex-1">
-                              <p className="text-sm font-medium text-gray-900">{notif.title}</p>
-                              <p className="text-xs text-gray-600 mt-1">{notif.message}</p>
-                              <p className="text-xs text-gray-400 mt-1">{notif.time}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="p-2 border-t border-gray-100">
-                      <button className="w-full text-center text-xs text-[#0078AE] font-medium py-1">
-                        View all notifications
-                      </button>
-                    </div>
-                  </div>
+              <button
+                onClick={handleNotificationsClick}
+                className="relative p-2 text-white transition-colors rounded-lg hover:bg-white/10"
+                title="Notifications"
+              >
+                <BellIcon className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full min-w-[1.25rem]">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
                 )}
-              </div>
+              </button>
             )}
-            */}
+
             {/* User menu - authenticated */}
             {isAuthenticated ? (
               <div className="relative" ref={dropdownRef}>
@@ -190,8 +196,12 @@ const Navbar = () => {
                 {userDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-50">
                     <div className="p-4 border-b border-gray-100">
-                      <p className="font-semibold text-gray-900">{displayName}</p>
-                      <p className="text-xs text-gray-500 mt-1">{user?.username || ""}</p>
+                      <p className="font-semibold text-gray-900">
+                        {displayName}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {user?.username || ""}
+                      </p>
                     </div>
                     <div className="py-2">
                       <div className="border-t border-gray-100 my-1"></div>
@@ -229,26 +239,53 @@ const Navbar = () => {
             className="p-2 text-white rounded-lg lg:hidden hover:bg-white/10 focus:outline-none transition-colors"
             data-testid="mobile-menu-button"
           >
-            {isOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
+            {isOpen ? (
+              <XMarkIcon className="w-6 h-6" />
+            ) : (
+              <Bars3Icon className="w-6 h-6" />
+            )}
           </button>
         </div>
       </div>
+
       {/* Mobile Menu */}
       <div
         className={`lg:hidden transition-all duration-300 ease-in-out ${
-          isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"
+          isOpen
+            ? "max-h-screen opacity-100"
+            : "max-h-0 opacity-0 overflow-hidden"
         }`}
         data-testid="mobile-menu"
       >
         <div className="bg-white shadow-lg">
           {isAuthenticated && (
             <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <UserCircleIcon className="w-12 h-12 text-[#0078AE]" />
-                <div>
-                  <p className="font-semibold text-gray-900">{displayName}</p>
-                  <p className="text-xs text-gray-500">{user?.username || ""}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <UserCircleIcon className="w-12 h-12 text-[#0078AE]" />
+                  <div>
+                    <p className="font-semibold text-gray-900">{displayName}</p>
+                    <p className="text-xs text-gray-500">
+                      {user?.username || ""}
+                    </p>
+                  </div>
                 </div>
+                {/* Notification Bell for Mobile */}
+                <button
+                  onClick={() => {
+                    handleNotificationsClick();
+                    toggleMenu();
+                  }}
+                  className="relative p-2 text-[#0078AE] transition-colors rounded-lg hover:bg-[#0078AE]/10"
+                  title="Notifications"
+                >
+                  <BellIcon className="w-6 h-6" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full min-w-[1.25rem]">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
           )}

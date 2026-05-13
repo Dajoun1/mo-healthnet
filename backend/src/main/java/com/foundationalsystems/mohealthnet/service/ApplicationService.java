@@ -103,5 +103,12 @@ public class ApplicationService {
         LOG.info("Application {} status updated to {} by user {}", applicationId, newStatus, reviewedBy);
         return updated;
     }
+
+    /**
+     * Save application (used for assignment updates)
+     */
+    public Application saveApplication(Application application) {
+        return applicationRepository.save(application);
+    }
 }
 

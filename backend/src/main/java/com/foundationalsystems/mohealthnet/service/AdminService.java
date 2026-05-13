@@ -85,6 +85,7 @@ public class AdminService {
         user.setLastName(lastName);
         user.setMiddleName(middleName);
         user.setRole(role != null ? role : User.UserRole.Applicant);
+
         user.setStatus(User.UserStatus.Active);
         user.setProfileComplete(false);
         user.setCreatedAt(java.time.LocalDateTime.now());

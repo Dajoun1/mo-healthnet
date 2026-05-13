@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFacebook, faTwitter, faLinkedin } from "@fortawesome/free-brands-svg-icons";
+import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/icons/mohealthnet1.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <footer className="bg-[#0078AE] text-white mt-auto">
@@ -32,16 +34,83 @@ const Footer = () => {
               <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 sm:left-0 sm:transform-none w-12 h-0.5 bg-white/30 rounded-full sm:hidden"></span>
             </h3>
             <ul className="space-y-2 mt-4 sm:mt-0">
-              {['Home', 'Apply now', 'Sign in', 'Check status'].map((item, index) => (
-                <li key={index}>
-                  <Link
-                    to={index === 0 ? '/' : index === 1 ? '/about' : '/contact'}
-                    className="text-sm text-gray-100 hover:text-white transition-colors inline-block py-1"
-                  >
-                    {item}
-                  </Link>
-                </li>
-              ))}
+              {isAuthenticated ? (
+                // Authenticated user links
+                <>
+                  <li>
+                    <Link
+                      to={user?.role === 'Applicant' ? '/applicant/dashboard' : user?.role === 'Employee' ? '/caseworker/dashboard' : '/admin/dashboard'}
+                      className="text-sm text-gray-100 hover:text-white transition-colors inline-block py-1"
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  {user?.role === 'Applicant' && (
+                    <>
+                      <li>
+                        <Link
+                          to="/applicant/application"
+                          className="text-sm text-gray-100 hover:text-white transition-colors inline-block py-1"
+                        >
+                          Apply now
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/applicant/applications"
+                          className="text-sm text-gray-100 hover:text-white transition-colors inline-block py-1"
+                        >
+                          My applications
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/applicant/about"
+                          className="text-sm text-gray-100 hover:text-white transition-colors inline-block py-1"
+                        >
+                          About
+                        </Link>
+                      </li>
+                    </>
+                  )}
+                </>
+              ) : (
+                // Public/Guest user links
+                <>
+                  <li>
+                    <Link
+                      to="/"
+                      className="text-sm text-gray-100 hover:text-white transition-colors inline-block py-1"
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/about"
+                      className="text-sm text-gray-100 hover:text-white transition-colors inline-block py-1"
+                    >
+                      About
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/signin"
+                      className="text-sm text-gray-100 hover:text-white transition-colors inline-block py-1"
+                    >
+                      Sign in
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/signup"
+                      className="text-sm text-gray-100 hover:text-white transition-colors inline-block py-1"
+                    >
+                      Sign up
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 
@@ -53,17 +122,17 @@ const Footer = () => {
             </h3>
             <ul className="space-y-2 mt-4 sm:mt-0">
               {[
-                'Program requirements',
-                'Contact support',
-                'Documentation guide',
-                'Eligibility details'
+                { text: 'Program requirements', link: '/applicant/about' },
+                { text: 'Contact support', link: '/applicant/support' },
+                { text: 'Documentation guide', link: '/applicant/about' },
+                { text: 'Eligibility details', link: '/applicant/about' }
               ].map((item, index) => (
                 <li key={index}>
                   <Link
-                    to="/contact"
+                    to={item.link}
                     className="text-sm text-gray-100 hover:text-white transition-colors inline-block py-1"
                   >
-                    {item}
+                    {item.text}
                   </Link>
                 </li>
               ))}
