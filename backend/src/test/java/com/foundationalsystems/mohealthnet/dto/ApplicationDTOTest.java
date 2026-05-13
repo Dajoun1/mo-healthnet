@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ApplicationDTOTest {
 
-    private ApplicationDTO activityDTO;
+    private ApplicationDTO.ActivityDTO activityDTO;
 
     @BeforeEach
     void setUp() {
@@ -19,5 +19,4 @@ class ApplicationDTOTest {
         activityDTO.setId(1);
         assertThat(activityDTO.getId()).isEqualTo(1);
     }
-
-    }
+}

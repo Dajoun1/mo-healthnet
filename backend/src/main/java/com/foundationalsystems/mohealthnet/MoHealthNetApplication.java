@@ -2,15 +2,12 @@ package com.foundationalsystems.mohealthnet;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-/**
- * Main method that serves as the entry point for the Spring Boot application.
- */
+@EnableScheduling
 public class MoHealthNetApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(MoHealthNetApplication.class, args);
 	}
-
 }

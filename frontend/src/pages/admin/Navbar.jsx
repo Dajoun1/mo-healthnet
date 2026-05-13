@@ -1,23 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  Bars3Icon,
+  XMarkIcon,
+  UserCircleIcon,
+  ChevronDownIcon,
+  ArrowRightOnRectangleIcon,
+} from "@heroicons/react/24/outline";
 import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/icons/mohealthnet1.png";
 
 const AdminNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { logout } = useAuth();
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
+  const toggleUserDropdown = () => setUserDropdownOpen(!userDropdownOpen);
+
   const handleLogout = () => {
     logout();
+    setUserDropdownOpen(false);
     navigate("/signin");
   };
 
+  const displayName = user?.firstName
+    ? `${user.firstName} ${user.lastName || ""}`.trim()
+    : "Administrator";
+
   const navItems = [
     { path: "/admin/dashboard", label: "User Management" },
+    { path: "/admin/support", label: "Support" },
   ];
 
   return (
@@ -42,12 +68,44 @@ const AdminNavbar = () => {
                 {item.label}
               </NavLink>
             ))}
-            <button
-              onClick={handleLogout}
-              className="px-3 py-2 text-sm font-medium text-gray-200 rounded-md hover:text-white"
-            >
-              Logout
-            </button>
+
+            {/* User Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={toggleUserDropdown}
+                className="flex items-center gap-2 px-3 py-2 text-white transition-colors rounded-lg hover:bg-white/10"
+              >
+                <UserCircleIcon className="w-8 h-8" />
+                <span className="text-sm font-medium">{displayName}</span>
+                <ChevronDownIcon
+                  className={`w-4 h-4 transition-transform duration-200 ${userDropdownOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {userDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-50">
+                  <div className="p-4 border-b border-gray-100">
+                    <p className="font-semibold text-gray-900">
+                      {displayName}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {user?.username || ""}
+                    </p>
+                    <p className="text-xs text-purple-600 mt-1 font-medium">
+                      Administrator
+                    </p>
+                  </div>
+                  <div className="py-2">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <ArrowRightOnRectangleIcon className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Mobile menu button */}
@@ -65,26 +123,46 @@ const AdminNavbar = () => {
 
       {/* Mobile menu */}
       {isOpen && (
-        <div className="md:hidden bg-[#0078AE] px-4 pb-4">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={() => setIsOpen(false)}
-              className={({ isActive }) =>
-                `block px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:text-white
-                ${isActive ? "text-white font-semibold" : ""}`
-              }
+        <div className="md:hidden bg-white shadow-lg">
+          {/* User Info in Mobile */}
+          <div className="p-4 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <UserCircleIcon className="w-12 h-12 text-purple-600" />
+              <div>
+                <p className="font-semibold text-gray-900">{displayName}</p>
+                <p className="text-xs text-gray-500">
+                  {user?.username || ""}
+                </p>
+                <p className="text-xs text-purple-600 mt-0.5 font-medium">
+                  Administrator
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => setIsOpen(false)}
+                className={({ isActive }) =>
+                  `block px-3 py-2 rounded-md text-base font-medium transition-colors
+                  ${isActive ? "text-purple-600 bg-purple-50" : "text-gray-700 hover:text-purple-600 hover:bg-gray-50"}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex items-center gap-3 w-full px-3 py-3 mt-2 text-base font-medium text-left text-red-600 transition-colors rounded-lg hover:bg-red-50"
             >
-              {item.label}
-            </NavLink>
-          ))}
-          <button
-            onClick={handleLogout}
-            className="block w-full text-left px-3 py-2 text-sm font-medium text-gray-200 hover:text-white"
-          >
-            Logout
-          </button>
+              <ArrowRightOnRectangleIcon className="w-5 h-5" />
+              Sign Out
+            </button>
+          </div>
         </div>
       )}
     </nav>

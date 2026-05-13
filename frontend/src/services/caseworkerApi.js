@@ -1,4 +1,4 @@
-﻿﻿import api from './api';
+﻿﻿﻿import api from './api';
 
 export const caseworkerApi = {
     getAllApplications: async () => {
@@ -11,6 +11,10 @@ export const caseworkerApi = {
     },
     updateApplicationStatus: async (applicationId, status, reviewedBy, reviewNotes = '') => {
         const response = await api.put(`/api/caseworker/applications/${applicationId}/status`, { status, reviewedBy, reviewNotes });
+        return response.data;
+    },
+    assignApplication: async (applicationId, caseworkerId) => {
+        const response = await api.put(`/api/caseworker/applications/${applicationId}/assign`, { caseworkerId });
         return response.data;
     },
     getStatistics: async () => {

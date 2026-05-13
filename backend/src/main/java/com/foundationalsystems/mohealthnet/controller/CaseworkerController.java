@@ -2,7 +2,6 @@ package com.foundationalsystems.mohealthnet.controller;
 
 import com.foundationalsystems.mohealthnet.dto.ApplicationDTO;
 import com.foundationalsystems.mohealthnet.entity.Application;
-import com.foundationalsystems.mohealthnet.entity.User;
 import com.foundationalsystems.mohealthnet.service.ApplicationService;
 import com.foundationalsystems.mohealthnet.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +40,18 @@ public class CaseworkerController {
             List<ApplicationDTO> applicationDTOs = applications.stream()
                     .map(app -> {
                         ApplicationDTO dto = new ApplicationDTO(app);
-                        // Fetch user details
+                        // Fetch applicant details
                         userRepository.findById(app.getUserId()).ifPresent(user -> {
                             dto.setApplicantFirstName(user.getFirstName());
                             dto.setApplicantLastName(user.getLastName());
                             dto.setApplicantFullName(user.getFirstName() + " " + user.getLastName());
                         });
+                        // Fetch assigned caseworker details
+                        if (app.getAssignedTo() != null) {
+                            userRepository.findById(app.getAssignedTo()).ifPresent(caseworker -> {
+                                dto.setAssignedToName(caseworker.getFirstName() + " " + caseworker.getLastName());
+                            });
+                        }
                         return dto;
                     })
                     .collect(Collectors.toList());
@@ -182,6 +187,63 @@ public class CaseworkerController {
             LOG.error("Failed to fetch statistics: {}", e.getMessage());
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("message", "Unable to fetch statistics");
+            errorResponse.put("success", false);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * Assign or unassign a caseworker to an application
+     */
+    @PutMapping("/applications/{applicationId}/assign")
+    public ResponseEntity<Map<String, Object>> assignApplication(
+            @PathVariable Integer applicationId,
+            @RequestBody Map<String, Object> request) {
+        try {
+            // Handle different number types from JSON (Integer, Long, etc.)
+            Integer caseworkerId = null;
+            Object idObj = request.get("caseworkerId");
+            if (idObj != null) {
+                if (idObj instanceof Number) {
+                    caseworkerId = ((Number) idObj).intValue();
+                } else if (idObj instanceof String) {
+                    caseworkerId = Integer.parseInt((String) idObj);
+                }
+            }
+
+            LOG.info("Attempting to assign application {} to caseworker {}", applicationId, caseworkerId);
+
+            Application application = applicationService.getApplicationById(applicationId);
+            application.setAssignedTo(caseworkerId);
+            Application updated = applicationService.saveApplication(application);
+
+            ApplicationDTO dto = new ApplicationDTO(updated);
+            // Populate assigned caseworker name
+            if (caseworkerId != null) {
+                userRepository.findById(caseworkerId).ifPresent(caseworker -> {
+                    dto.setAssignedToName(caseworker.getFirstName() + " " + caseworker.getLastName());
+                });
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", caseworkerId != null ? "Application assigned successfully" : "Application unassigned");
+            response.put("application", dto);
+            response.put("success", true);
+
+            LOG.info("Application {} assigned to caseworker {}", applicationId, caseworkerId);
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Invalid assignment request: {}", e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Application not found");
+            errorResponse.put("success", false);
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            LOG.error("Failed to assign application {}: {}", applicationId, e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Unable to assign application: " + e.getMessage());
+            errorResponse.put("error", e.getClass().getSimpleName());
             errorResponse.put("success", false);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }

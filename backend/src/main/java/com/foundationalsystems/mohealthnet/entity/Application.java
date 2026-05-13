@@ -57,6 +57,9 @@ public class Application {
     @Column(name = "reviewed_by")
     private Integer reviewedBy;
 
+    @Column(name = "assigned_to")
+    private Integer assignedTo;
+
     @Column(name = "reviewed_at")
     private LocalDateTime reviewedAt;
 

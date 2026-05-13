@@ -5,8 +5,8 @@ const ApplicantLayout = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow "> {/* pt-16 accounts for fixed navbar height */}
-        <Outlet /> {/* This renders the current page content */}
+      <main className="flex-grow pt-20 "> 
+        <Outlet /> 
       </main>
       <Footer />
     </div>

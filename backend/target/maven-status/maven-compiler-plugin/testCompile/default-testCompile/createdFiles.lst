@@ -1,0 +1,4 @@
+com\foundationalsystems\mohealthnet\dto\ApplicationDTOTest.class
+com\foundationalsystems\mohealthnet\controller\LoginControllerTest.class
+com\foundationalsystems\mohealthnet\util\TestPasswordHashGenerator.class
+com\foundationalsystems\mohealthnet\config\TestSecurityConfig.class
